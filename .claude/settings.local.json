@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd.exe:*)",
+      "Bash(mvn:*)",
+      "Bash(mvnw.cmd:*)",
+      "Bash(dir:*)",
+      "Bash(nul)",
+      "Bash(Login.jsx.backup)",
+      "Bash(.mvnw.cmd clean install:*)",
+      "Bash(start /B cmd /c \"cd \"\"c:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\"\" && mvnw.cmd spring-boot:run > server.log 2>&1\")",
+      "Bash(java:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"& { .\\mvnw.cmd clean package -DskipTests }\")",
+      "Bash(if exist StudentDashboard.jsx.backup del StudentDashboard.jsx.backup)",
+      "Bash(if exist StudentDashboard.jsx ren StudentDashboard.jsx StudentDashboard.jsx.backup)",
+      "Bash(copy:*)",
+      "Bash(powershell -Command \"& { .\\mvnw.cmd package -DskipTests }\")",
+      "Bash(powershell -Command \"& { .\\mvnw.cmd compile -DskipTests }\")",
+      "Bash(start /B cmd /c \"mvnw.cmd spring-boot:run > server.log 2>&1\")",
+      "Bash(powershell:*)",
+      "Bash(taskkill:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
