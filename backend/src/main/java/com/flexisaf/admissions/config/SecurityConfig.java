@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/admin/create-reviewer").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/applicants").permitAll()
 
                         // Swagger/OpenAPI endpoints

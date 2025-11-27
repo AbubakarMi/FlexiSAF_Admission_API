@@ -20,7 +20,19 @@
       "Bash(powershell -Command \"& { .\\mvnw.cmd compile -DskipTests }\")",
       "Bash(start /B cmd /c \"mvnw.cmd spring-boot:run > server.log 2>&1\")",
       "Bash(powershell:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(timeout /t 20 /nobreak)",
+      "Bash(psql:*)",
+      "Bash(if exist create_reviewer_account.sql del create_reviewer_account.sql)",
+      "Bash(if exist create_reviewer.sql del create_reviewer.sql)",
+      "Bash(del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\fix_flyway.sql\" 2)",
+      "Bash(del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\manual_fix.sql\" 2)",
+      "Bash(del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\create_reviewer_account.sql\" 2)",
+      "Bash(if exist \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\test_password.sql\" del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\test_password.sql\" 2)",
+      "Bash(if exist \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\fix_reviewer_password.sql\" del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\fix_reviewer_password.sql\" 2)",
+      "Bash(npm install:*)",
+      "Bash(del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\delete_test_reviewer.sql\" 2)",
+      "Bash(if exist \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\delete_test_reviewer.sql\" del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\delete_test_reviewer.sql\")"
     ],
     "deny": [],
     "ask": []

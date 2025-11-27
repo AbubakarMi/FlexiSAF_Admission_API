@@ -254,7 +254,7 @@ const Register = () => {
         <p className="text-text-secondary mb-6">Welcome to FlexiSAF Admissions, {registeredUser?.firstName}!</p>
 
         {registeredUser && (
-          <>
+          <>z
             <div className="space-y-3 mb-6">
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <p className="text-xs font-semibold text-text-secondary mb-1">Full Name</p>

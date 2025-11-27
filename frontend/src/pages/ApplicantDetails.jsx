@@ -104,20 +104,20 @@ const ApplicantDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background to-primary-50/30">
       {/* Header */}
-      <header className="bg-primary text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="bg-gradient-to-r from-primary to-primary-600 text-white shadow-lg animate-slide-in-down">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <button
             onClick={() => navigate('/dashboard')}
-            className="text-white hover:text-primary-100 mb-2"
+            className="text-white hover:text-primary-100 mb-3 flex items-center transition-all hover:translate-x-[-4px]"
           >
-            ← Back to Dashboard
+            <span className="mr-2">←</span> Back to Dashboard
           </button>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-3xl font-black">
             {applicant.firstName} {applicant.lastName}
           </h1>
-          <p className="text-primary-100 text-sm mt-1">{applicant.email}</p>
+          <p className="text-primary-100 text-sm mt-2">{applicant.email}</p>
         </div>
       </header>
 
@@ -126,8 +126,10 @@ const ApplicantDetails = () => {
           {/* Left Column - Applicant Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
-            <div className="card">
-              <h2 className="text-xl font-bold text-primary mb-4">Basic Information</h2>
+            <div className="card hover:shadow-xl transition-all duration-300 animate-fade-in">
+              <h2 className="text-xl font-bold text-primary mb-4 flex items-center">
+                <span className="mr-2">👤</span> Basic Information
+              </h2>
               <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <dt className="text-sm font-medium text-text-secondary">First Name</dt>
@@ -148,7 +150,7 @@ const ApplicantDetails = () => {
                 <div>
                   <dt className="text-sm font-medium text-text-secondary">GPA</dt>
                   <dd className="mt-1 text-lg font-semibold text-primary">
-                    {formatGPA(applicant.gpa)} / 4.0
+                    {formatGPA(applicant.gpa)} / 5.0
                   </dd>
                 </div>
                 <div>
@@ -169,8 +171,10 @@ const ApplicantDetails = () => {
             </div>
 
             {/* Status Management */}
-            <div className="card">
-              <h2 className="text-xl font-bold text-primary mb-4">Application Status</h2>
+            <div className="card hover:shadow-xl transition-all duration-300 animate-fade-in animation-delay-100">
+              <h2 className="text-xl font-bold text-primary mb-4 flex items-center">
+                <span className="mr-2">📊</span> Application Status
+              </h2>
               <div className="flex items-center space-x-4">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-text-secondary mb-2">
@@ -200,8 +204,10 @@ const ApplicantDetails = () => {
             </div>
 
             {/* Reviewer Notes */}
-            <div className="card">
-              <h2 className="text-xl font-bold text-primary mb-4">Reviewer Notes</h2>
+            <div className="card hover:shadow-xl transition-all duration-300 animate-fade-in animation-delay-200">
+              <h2 className="text-xl font-bold text-primary mb-4 flex items-center">
+                <span className="mr-2">📝</span> Reviewer Notes
+              </h2>
 
               {/* Add Note Form */}
               <form onSubmit={handleAddNote} className="mb-6">
@@ -235,8 +241,10 @@ const ApplicantDetails = () => {
           <div className="space-y-6">
             {/* AI Score */}
             {aiHint && (
-              <div className="card bg-gradient-to-br from-primary-50 to-white border border-primary-100">
-                <h2 className="text-xl font-bold text-primary mb-4">AI Evaluation</h2>
+              <div className="card bg-gradient-to-br from-primary-50 to-white border-2 border-primary-200 hover:shadow-xl transition-all duration-300 animate-scale-in">
+                <h2 className="text-xl font-bold text-primary mb-4 flex items-center">
+                  <span className="mr-2">🤖</span> AI Evaluation
+                </h2>
 
                 <div className="space-y-4">
                   <div>
@@ -270,8 +278,10 @@ const ApplicantDetails = () => {
             )}
 
             {/* Quick Stats */}
-            <div className="card">
-              <h3 className="text-lg font-bold text-primary mb-3">Quick Stats</h3>
+            <div className="card bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 hover:shadow-xl transition-all duration-300 animate-scale-in animation-delay-100">
+              <h3 className="text-lg font-bold text-primary mb-3 flex items-center">
+                <span className="mr-2">📈</span> Quick Stats
+              </h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Total Notes:</span>

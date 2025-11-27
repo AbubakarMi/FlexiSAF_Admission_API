@@ -24,6 +24,7 @@ public class ApplicantService {
     private final ApplicantRepository applicantRepository;
     private final ApplicantMapper applicantMapper;
     private final AIService aiService;
+    private final EmailService emailService;
 
     @Transactional
     public ApplicantDTO createApplicant(ApplicantCreateDTO createDTO) {
@@ -52,6 +53,14 @@ public class ApplicantService {
 
         // Save applicant
         Applicant savedApplicant = applicantRepository.save(applicant);
+
+        // Send application received email
+        try {
+            emailService.sendApplicationReceivedEmail(savedApplicant);
+        } catch (Exception e) {
+            log.error("Failed to send application received email", e);
+            // Don't fail the entire operation if email fails
+        }
 
         log.info("Successfully saved applicant with ID: {}", savedApplicant.getId());
         return applicantMapper.toDTO(savedApplicant);
@@ -102,6 +111,9 @@ public class ApplicantService {
             }
         }
 
+        // Track old status for email notification
+        ApplicationStatus oldStatus = applicant.getStatus();
+
         // Update entity from DTO
         applicantMapper.updateEntityFromDTO(updateDTO, applicant);
 
@@ -111,6 +123,22 @@ public class ApplicantService {
         }
 
         Applicant updatedApplicant = applicantRepository.save(applicant);
+
+        // Send email notification if status changed
+        if (updateDTO.getStatus() != null && !updateDTO.getStatus().equals(oldStatus)) {
+            try {
+                if (updateDTO.getStatus() == ApplicationStatus.ACCEPTED) {
+                    emailService.sendAcceptanceEmail(updatedApplicant);
+                } else if (updateDTO.getStatus() == ApplicationStatus.REJECTED) {
+                    emailService.sendRejectionEmail(updatedApplicant);
+                } else {
+                    emailService.sendStatusChangeEmail(updatedApplicant, updateDTO.getStatus().toString());
+                }
+            } catch (Exception e) {
+                log.error("Failed to send status change email", e);
+                // Don't fail the entire operation if email fails
+            }
+        }
 
         log.info("Successfully updated applicant with ID: {}", id);
         return applicantMapper.toDTO(updatedApplicant);

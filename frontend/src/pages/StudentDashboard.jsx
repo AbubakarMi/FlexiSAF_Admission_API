@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useEnrollment } from '../context/EnrollmentContext';
 import applicantService from '../services/applicantService';
 import Modal from '../components/Modal';
+import EnrolledStudentSidebar from '../components/EnrolledStudentSidebar';
 
 // Comprehensive list of 100+ academic programs worldwide
 const ACADEMIC_PROGRAMS = [
@@ -174,6 +176,7 @@ const ACADEMIC_PROGRAMS = [
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { enrolledCourses, calculateGPA } = useEnrollment();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -347,6 +350,260 @@ const StudentDashboard = () => {
     );
   }
 
+  // Check if student is accepted
+  const isAccepted = existingApplication?.status === 'ACCEPTED';
+
+  // If student is accepted, show enrolled student layout with sidebar
+  if (isAccepted && existingApplication) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <EnrolledStudentSidebar />
+
+        <div className="flex-1 overflow-y-auto">
+          {/* Header */}
+          <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+            <div className="px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-text">Student Dashboard</h1>
+                  <p className="text-sm text-text-secondary font-medium">Welcome back, {existingApplication.firstName}!</p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="px-3 py-1.5 bg-success bg-opacity-10 border border-success border-opacity-20 rounded-lg">
+                    <p className="text-xs font-bold text-success">ENROLLED</p>
+                  </div>
+                  <div className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs font-bold text-blue-600">Spring 2025</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main className="p-6">
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-primary bg-opacity-10 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs font-semibold text-text-secondary mb-1">Program</p>
+                <p className="text-sm font-bold text-text truncate">{existingApplication.program}</p>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-success bg-opacity-10 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs font-semibold text-text-secondary mb-1">Current GPA</p>
+                <p className="text-2xl font-black text-text">{calculateGPA() || '0.00'}</p>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                      <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs font-semibold text-text-secondary mb-1">Enrolled Courses</p>
+                <p className="text-2xl font-black text-text">{enrolledCourses.length}</p>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-warning" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs font-semibold text-text-secondary mb-1">Pending Fees</p>
+                <p className="text-lg font-black text-text">₦70,000</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              {/* Academic Overview */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Current Courses */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="px-5 py-4 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-text">Current Courses</h3>
+                  </div>
+                  <div className="p-5">
+                    {enrolledCourses.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-text-secondary text-sm">No courses enrolled yet.</p>
+                        <button
+                          onClick={() => navigate('/enrolled/courses')}
+                          className="mt-3 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:shadow-lg transition-all"
+                        >
+                          Enroll in Courses
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {enrolledCourses.slice(0, 5).map((course) => (
+                          <div key={course.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div className="flex items-center space-x-3 flex-1">
+                              <div className="w-10 h-10 rounded-lg bg-primary bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                                <span className="text-xs font-bold text-primary">{course.code.substring(0, 2)}</span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-bold text-sm text-text truncate">{course.name}</p>
+                                <p className="text-xs text-text-secondary">{course.code} • {course.credits} Credits</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="text-right">
+                                <p className="text-xs font-semibold text-text-secondary">Progress</p>
+                                <p className="text-sm font-bold text-text">{course.progress}%</p>
+                              </div>
+                              <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div className="h-full bg-success rounded-full" style={{ width: `${course.progress}%` }}></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Recent Activity */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="px-5 py-4 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-text">Recent Activity</h3>
+                  </div>
+                  <div className="p-5">
+                    <div className="space-y-3">
+                      {[
+                        { action: 'Assignment submitted', course: 'CS201', time: '2 hours ago', type: 'success' },
+                        { action: 'Quiz completed', course: 'MATH301', time: '1 day ago', type: 'success' },
+                        { action: 'New material posted', course: 'ENG102', time: '2 days ago', type: 'info' },
+                        { action: 'Grade published', course: 'PHY201', time: '3 days ago', type: 'success' }
+                      ].map((activity, idx) => (
+                        <div key={idx} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                            activity.type === 'success' ? 'bg-success bg-opacity-10' : 'bg-blue-100'
+                          }`}>
+                            <svg className={`w-4 h-4 ${activity.type === 'success' ? 'text-success' : 'text-blue-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm text-text">{activity.action}</p>
+                            <p className="text-xs text-text-secondary">{activity.course} • {activity.time}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar Info */}
+              <div className="space-y-6">
+                {/* Student Info */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                  <h3 className="text-lg font-bold text-text mb-4">Student Information</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs font-semibold text-text-secondary mb-1">Full Name</p>
+                      <p className="text-sm font-bold text-text">{existingApplication.firstName} {existingApplication.lastName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-text-secondary mb-1">Student ID</p>
+                      <p className="text-sm font-bold text-text">STU-{existingApplication.id}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-text-secondary mb-1">Email</p>
+                      <p className="text-sm font-semibold text-text break-all">{existingApplication.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-text-secondary mb-1">Enrollment Date</p>
+                      <p className="text-sm font-semibold text-text">January 15, 2025</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-text-secondary mb-1">Expected Graduation</p>
+                      <p className="text-sm font-semibold text-text">May 2029</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Upcoming Events */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                  <h3 className="text-lg font-bold text-text mb-4">Upcoming Events</h3>
+                  <div className="space-y-3">
+                    {[
+                      { title: 'Midterm Exams', date: 'Mar 10-14', type: 'exam' },
+                      { title: 'Assignment Due', date: 'Feb 28', type: 'deadline' },
+                      { title: 'Spring Break', date: 'Mar 17-21', type: 'holiday' }
+                    ].map((event, idx) => (
+                      <div key={idx} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          event.type === 'exam' ? 'bg-red-100' : event.type === 'deadline' ? 'bg-yellow-100' : 'bg-green-100'
+                        }`}>
+                          <svg className={`w-4 h-4 ${
+                            event.type === 'exam' ? 'text-red-600' : event.type === 'deadline' ? 'text-warning' : 'text-success'
+                          }`} fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm text-text">{event.title}</p>
+                          <p className="text-xs text-text-secondary">{event.date}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
+                  <h3 className="text-sm font-bold text-primary mb-3">Quick Actions</h3>
+                  <div className="space-y-2 text-sm text-text">
+                    <p className="flex items-center">
+                      <svg className="w-4 h-4 text-primary mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">Complete fee payment</span>
+                    </p>
+                    <p className="flex items-center">
+                      <svg className="w-4 h-4 text-primary mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">Check academic calendar</span>
+                    </p>
+                    <p className="flex items-center">
+                      <svg className="w-4 h-4 text-primary mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">Update profile information</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular application view for non-accepted students
   return (
     <div className="min-h-screen bg-background">
       {/* Header - Clean Design */}
@@ -400,17 +657,34 @@ const StudentDashboard = () => {
         {/* Existing Application View */}
         {existingApplication ? (
           <div className="space-y-8 animate-fade-in">
+            {/* Congratulations Banner for Accepted Students */}
+            {isAccepted && (
+              <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl shadow-2xl p-8 text-white mb-8 border-4 border-green-500">
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl">
+                    <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-3xl font-black mb-2">Congratulations! You've Been Admitted!</h2>
+                    <p className="text-lg text-white/90 font-medium">Welcome to FlexiSAF University. Your enrollment is now active.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Welcome Section */}
             <div className="mb-10">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${isAccepted ? 'bg-green-600' : 'bg-primary'}`}>
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-4xl font-black text-text mb-1">Your Application Status</h2>
-                  <p className="text-lg text-text-secondary font-medium">Track your admission application progress below</p>
+                  <h2 className="text-4xl font-black text-text mb-1">{isAccepted ? 'Your Enrollment Details' : 'Your Application Status'}</h2>
+                  <p className="text-lg text-text-secondary font-medium">{isAccepted ? 'View your admission and enrollment information' : 'Track your admission application progress below'}</p>
                 </div>
               </div>
             </div>
