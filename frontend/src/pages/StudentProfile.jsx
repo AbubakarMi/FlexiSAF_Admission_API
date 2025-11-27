@@ -11,16 +11,15 @@ const StudentProfile = () => {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || '',
-    phone: '+234 (0) 123-456-7890',
-    address: '15 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
-    dateOfBirth: '2000-05-15',
+    phone: '',
+    address: '',
+    dateOfBirth: '',
     nationality: 'Nigerian',
-    stateOfOrigin: 'Lagos State',
-    program: 'Computer Science',
-    level: '200 Level',
-    emergencyContact: 'Chidi Okonkwo',
-    emergencyPhone: '+234 (0) 987-654-3210',
-    emergencyRelationship: 'Father'
+    stateOfOrigin: '',
+    program: '',
+    emergencyContact: '',
+    emergencyPhone: '',
+    emergencyRelationship: ''
   });
 
   // Load saved profile data from localStorage
@@ -50,21 +49,25 @@ const StudentProfile = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setFormData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
-      phone: '+234 (0) 123-456-7890',
-      address: '15 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
-      dateOfBirth: '2000-05-15',
-      nationality: 'Nigerian',
-      stateOfOrigin: 'Lagos State',
-      program: 'Computer Science',
-      level: '200 Level',
-      emergencyContact: 'Chidi Okonkwo',
-      emergencyPhone: '+234 (0) 987-654-3210',
-      emergencyRelationship: 'Father'
-    });
+    const savedProfile = localStorage.getItem(`profile_${user?.id}`);
+    if (savedProfile) {
+      setFormData(JSON.parse(savedProfile));
+    } else {
+      setFormData({
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        email: user?.email || '',
+        phone: '',
+        address: '',
+        dateOfBirth: '',
+        nationality: 'Nigerian',
+        stateOfOrigin: '',
+        program: '',
+        emergencyContact: '',
+        emergencyPhone: '',
+        emergencyRelationship: ''
+      });
+    }
   };
 
   return (
@@ -106,49 +109,44 @@ const StudentProfile = () => {
 
         <main className="p-6">
           {/* Profile Header Card */}
-          <div className="bg-gradient-to-r from-primary to-primary-600 rounded-lg shadow-sm p-5 text-white mb-6">
+          <div className="bg-white rounded-xl shadow-sm border-2 border-primary p-6 mb-6">
             <div className="flex items-center gap-5">
-              <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-lg flex-shrink-0">
-                <span className="text-3xl font-black text-primary">
+              <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-lg flex-shrink-0">
+                <span className="text-3xl font-black text-white">
                   {formData.firstName?.charAt(0)}{formData.lastName?.charAt(0)}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-2xl font-black mb-1">
+                <h2 className="text-2xl font-black text-text mb-1">
                   {formData.firstName} {formData.lastName}
                 </h2>
-                <p className="text-blue-100 text-sm font-semibold">Student ID: STU-{user?.id || '00000'}</p>
+                <p className="text-text-secondary text-sm font-semibold">Student ID: STU-{user?.id || '00000'}</p>
                 <div className="flex items-center gap-3 mt-2">
-                  <span className="px-2 py-0.5 bg-white bg-opacity-20 backdrop-blur-sm rounded text-xs font-bold">
+                  <span className="px-3 py-1 bg-success bg-opacity-10 border border-success border-opacity-20 rounded-lg text-xs font-bold text-success">
                     Enrolled Student
                   </span>
-                  <span className="px-2 py-0.5 bg-white bg-opacity-20 backdrop-blur-sm rounded text-xs font-bold">
-                    {formData.level}
-                  </span>
+                  {formData.program && (
+                    <span className="px-3 py-1 bg-primary bg-opacity-10 border border-primary border-opacity-20 rounded-lg text-xs font-bold text-primary">
+                      {formData.program}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Academic Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-text-secondary uppercase">Program</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-wide">Program</p>
                 <Book className="w-5 h-5 text-primary" />
               </div>
-              <p className="text-lg font-black text-text">{formData.program}</p>
+              <p className="text-lg font-black text-text">{formData.program || 'Not Set'}</p>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-text-secondary uppercase">Current Level</p>
-                <Award className="w-5 h-5 text-purple-600" />
-              </div>
-              <p className="text-lg font-black text-text">{formData.level}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-text-secondary uppercase">Student ID</p>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-wide">Student ID</p>
                 <User className="w-5 h-5 text-green-600" />
               </div>
               <p className="text-lg font-black text-text">STU-{user?.id || '00000'}</p>
@@ -156,12 +154,12 @@ const StudentProfile = () => {
           </div>
 
           {/* Personal Information */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+            <div className="bg-gray-50 px-5 py-4 border-b border-gray-200 rounded-t-xl">
               <h2 className="text-lg font-bold text-text">Personal Information</h2>
             </div>
 
-            <div className="p-5">
+            <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* First Name */}
                 <div>
@@ -342,12 +340,12 @@ const StudentProfile = () => {
           </div>
 
           {/* Emergency Contact */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div className="bg-red-50 px-4 py-3 border-b border-red-200">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+            <div className="bg-red-50 px-5 py-4 border-b border-red-200 rounded-t-xl">
               <h2 className="text-lg font-bold text-text">Emergency Contact</h2>
             </div>
 
-            <div className="p-5">
+            <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Emergency Contact Name */}
                 <div>

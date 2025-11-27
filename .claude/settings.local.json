@@ -32,7 +32,10 @@
       "Bash(if exist \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\fix_reviewer_password.sql\" del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\fix_reviewer_password.sql\" 2)",
       "Bash(npm install:*)",
       "Bash(del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\delete_test_reviewer.sql\" 2)",
-      "Bash(if exist \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\delete_test_reviewer.sql\" del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\delete_test_reviewer.sql\")"
+      "Bash(if exist \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\delete_test_reviewer.sql\" del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\backend\\delete_test_reviewer.sql\")",
+      "Bash(del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\frontend\\src\\data\\courseData.js\")",
+      "Bash(del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\frontend\\src\\pages\\AcademicCalendar.jsx\")",
+      "Bash(if exist \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\frontend\\src\\pages\\AcademicCalendar.jsx\" del \"C:\\Users\\lenovo\\Documents\\DevFlux\\FlexiSAF Admission API\\frontend\\src\\pages\\AcademicCalendar.jsx\")"
     ],
     "deny": [],
     "ask": []

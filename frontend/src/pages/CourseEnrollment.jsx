@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import EnrolledStudentSidebar from '../components/EnrolledStudentSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useEnrollment } from '../context/EnrollmentContext';
-import { getCoursesByProgram } from '../data/courseData';
-import { BookOpen, Clock, Users, CheckCircle, Search, Filter, AlertCircle, X } from 'lucide-react';
+import { getCoursesByProgram, getAllPrograms } from '../data/courseData';
+import { BookOpen, Clock, Users, CheckCircle, Search, AlertCircle, X } from 'lucide-react';
 
 const CourseEnrollment = () => {
   const { user } = useAuth();
@@ -13,7 +13,6 @@ const CourseEnrollment = () => {
 
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterLevel, setFilterLevel] = useState('all');
   const [alert, setAlert] = useState(null);
   const [studentProgram, setStudentProgram] = useState('');
 
@@ -21,15 +20,32 @@ const CourseEnrollment = () => {
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
+        // First try to get from localStorage (set by StudentDashboard)
+        const cachedApplication = localStorage.getItem('studentApplication');
+        if (cachedApplication) {
+          const appData = JSON.parse(cachedApplication);
+          if (appData.program) {
+            console.log('Program loaded from cache:', appData.program);
+            setStudentProgram(appData.program);
+            return;
+          }
+        }
+
+        // If not in cache, try API
         const response = await fetch(`http://localhost:8080/api/applications/email/${user?.email}`);
         if (response.ok) {
           const data = await response.json();
           setStudentProgram(data.program);
+          // Cache for next time
+          localStorage.setItem('studentApplication', JSON.stringify(data));
+        } else {
+          console.error('API returned error:', response.status);
+          // Fallback: Let user select their program
+          setStudentProgram('');
         }
       } catch (error) {
         console.error('Error fetching student data:', error);
-        // Fallback to Computer Science if error
-        setStudentProgram('Computer Science');
+        setStudentProgram('');
       }
     };
 
@@ -41,12 +57,16 @@ const CourseEnrollment = () => {
   // Get available courses for student's program
   const availableCourses = getCoursesByProgram(studentProgram);
 
+  // Debug logging
+  console.log('Student Program:', studentProgram);
+  console.log('Available Courses:', availableCourses);
+  console.log('All Programs in System:', getAllPrograms());
+
   const filteredCourses = availableCourses.filter(course => {
     const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLevel = filterLevel === 'all' || course.level === filterLevel;
     const notEnrolled = !isEnrolled(course.id);
-    return matchesSearch && matchesLevel && notEnrolled;
+    return matchesSearch && notEnrolled;
   });
 
   const toggleCourseSelection = (courseId) => {
@@ -115,8 +135,18 @@ const CourseEnrollment = () => {
               <div>
                 <h1 className="text-2xl font-black text-text">Course Enrollment</h1>
                 <p className="text-sm text-text-secondary font-medium">
-                  {studentProgram} - Spring 2025
+                  {studentProgram || 'Loading...'} - Spring 2025
                 </p>
+                {!studentProgram && (
+                  <p className="text-xs text-red-600 font-semibold mt-1">
+                    No program found. Please check your application.
+                  </p>
+                )}
+                {studentProgram && availableCourses.length === 0 && (
+                  <p className="text-xs text-red-600 font-semibold mt-1">
+                    Warning: No courses found for "{studentProgram}". Check program name match.
+                  </p>
+                )}
               </div>
               {selectedCourses.length > 0 && (
                 <button
@@ -138,7 +168,7 @@ const CourseEnrollment = () => {
               <h2 className="text-lg font-bold text-text mb-3">Currently Enrolled ({enrolledCourses.length})</h2>
               <div className="grid gap-3">
                 {enrolledCourses.map(course => (
-                  <div key={course.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                  <div key={course.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 flex-1">
                         <div className="w-10 h-10 rounded-lg bg-success bg-opacity-10 flex items-center justify-center flex-shrink-0">
@@ -185,33 +215,17 @@ const CourseEnrollment = () => {
             </div>
           )}
 
-          {/* Search and Filter */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search courses by name or code..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <select
-                  value={filterLevel}
-                  onChange={(e) => setFilterLevel(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="all">All Levels</option>
-                  <option value="100">100 Level</option>
-                  <option value="200">200 Level</option>
-                  <option value="300">300 Level</option>
-                  <option value="400">400 Level</option>
-                </select>
-              </div>
+          {/* Search */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search courses by name or code..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
             </div>
           </div>
 
@@ -222,11 +236,11 @@ const CourseEnrollment = () => {
             </div>
 
             {filteredCourses.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No Available Courses</h3>
                 <p className="text-gray-600">
-                  {searchTerm || filterLevel !== 'all'
+                  {searchTerm
                     ? 'No courses match your search criteria'
                     : 'You are enrolled in all available courses'}
                 </p>
@@ -237,7 +251,7 @@ const CourseEnrollment = () => {
                   <div
                     key={course.id}
                     onClick={() => toggleCourseSelection(course.id)}
-                    className={`bg-white rounded-lg shadow-sm border-2 p-4 cursor-pointer transition-all hover:shadow-md ${
+                    className={`bg-white rounded-xl shadow-sm border-2 p-4 cursor-pointer transition-all hover:shadow-md ${
                       selectedCourses.includes(course.id)
                         ? 'border-primary bg-blue-50'
                         : 'border-gray-200'

@@ -128,38 +128,38 @@ const GradesResults = () => {
         <main className="p-6">
           {/* GPA Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-primary to-primary-600 rounded-lg shadow-sm p-5 text-white">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold text-blue-100 uppercase">Current GPA</h3>
-                <Award className="w-6 h-6 text-white opacity-80" />
+            <div className="bg-white rounded-xl shadow-sm border-2 border-primary p-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wide">Current GPA</h3>
+                <Award className="w-6 h-6 text-primary" />
               </div>
-              <p className="text-4xl font-black mb-1">{calculateGPA()}</p>
-              <p className="text-blue-100 text-xs font-medium">out of 4.0</p>
+              <p className="text-5xl font-black text-primary mb-1">{calculateGPA()}</p>
+              <p className="text-text-secondary text-xs font-bold">out of 4.0</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold text-text-secondary uppercase">Credits Earned</h3>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wide">Credits Earned</h3>
                 <TrendingUp className="w-6 h-6 text-green-600" />
               </div>
-              <p className="text-4xl font-black text-text mb-1">
+              <p className="text-5xl font-black text-green-600 mb-1">
                 {currentCourses.reduce((sum, course) => sum + course.credits, 0)}
               </p>
-              <p className="text-text-secondary text-xs font-medium">this semester</p>
+              <p className="text-text-secondary text-xs font-bold">this semester</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold text-text-secondary uppercase">Courses</h3>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wide">Courses</h3>
                 <FileText className="w-6 h-6 text-purple-600" />
               </div>
-              <p className="text-4xl font-black text-text mb-1">{currentCourses.length}</p>
-              <p className="text-text-secondary text-xs font-medium">enrolled</p>
+              <p className="text-5xl font-black text-purple-600 mb-1">{currentCourses.length}</p>
+              <p className="text-text-secondary text-xs font-bold">enrolled</p>
             </div>
           </div>
 
           {/* Semester Selector */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
             <label className="block text-xs font-bold text-text-secondary mb-2">Select Semester</label>
             <select
               value={selectedSemester}
@@ -177,7 +177,7 @@ const GradesResults = () => {
             <h2 className="text-lg font-bold text-text mb-3">Course Grades - {selectedSemester}</h2>
 
             {currentCourses.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                 <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No Courses Enrolled</h3>
                 <p className="text-gray-600 mb-4">You haven't enrolled in any courses yet. Start by browsing available courses.</p>
@@ -191,7 +191,7 @@ const GradesResults = () => {
             ) : (
               <div className="space-y-3">
                 {currentCourses.map(course => (
-                <div key={course.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div key={course.id} className="bg-white rounded-xl shadow-sm border border-gray-200">
                   {/* Course Header */}
                   <div
                     className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
@@ -304,7 +304,7 @@ const GradesResults = () => {
           </div>
 
           {/* Semester Summary */}
-          <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h3 className="text-sm font-bold text-text mb-3">Semester Summary</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -331,7 +331,7 @@ const GradesResults = () => {
           </div>
 
           {/* Grading Scale */}
-          <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h3 className="text-sm font-bold text-text mb-3">Grading Scale</h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {[

@@ -6,171 +6,18 @@ import applicantService from '../services/applicantService';
 import Modal from '../components/Modal';
 import EnrolledStudentSidebar from '../components/EnrolledStudentSidebar';
 
-// Comprehensive list of 100+ academic programs worldwide
+// Skills-based learning programs available
 const ACADEMIC_PROGRAMS = [
-  // Computer Science & IT
-  'Computer Science',
-  'Software Engineering',
-  'Information Technology',
-  'Computer Engineering',
-  'Data Science',
-  'Artificial Intelligence',
-  'Cybersecurity',
-  'Information Systems',
   'Web Development',
   'Mobile App Development',
-  'Game Development',
-  'Network Engineering',
-  'Cloud Computing',
-  'DevOps Engineering',
-
-  // Engineering
-  'Mechanical Engineering',
-  'Electrical Engineering',
-  'Civil Engineering',
-  'Chemical Engineering',
-  'Aerospace Engineering',
-  'Biomedical Engineering',
-  'Environmental Engineering',
-  'Industrial Engineering',
-  'Petroleum Engineering',
-  'Marine Engineering',
-  'Agricultural Engineering',
-  'Mining Engineering',
-  'Structural Engineering',
-  'Automotive Engineering',
-  'Robotics Engineering',
-  'Nuclear Engineering',
-  'Materials Engineering',
-  'Telecommunications Engineering',
-
-  // Business & Management
-  'Business Administration',
-  'Business Management',
-  'Accounting',
-  'Finance',
-  'Marketing',
-  'Human Resource Management',
-  'International Business',
-  'Entrepreneurship',
-  'Economics',
-  'Business Analytics',
-  'Supply Chain Management',
-  'Project Management',
-  'Real Estate Management',
-  'Hospitality Management',
-  'Tourism Management',
-  'Sports Management',
-
-  // Natural Sciences
-  'Physics',
-  'Chemistry',
-  'Biology',
-  'Mathematics',
-  'Statistics',
-  'Biochemistry',
-  'Microbiology',
-  'Biotechnology',
-  'Genetics',
-  'Molecular Biology',
-  'Environmental Science',
-  'Marine Biology',
-  'Astronomy',
-  'Geology',
-  'Meteorology',
-  'Zoology',
-  'Botany',
-
-  // Health Sciences & Medicine
-  'Medicine (MBBS/MD)',
-  'Nursing',
-  'Pharmacy',
-  'Dentistry',
-  'Public Health',
-  'Physiotherapy',
-  'Occupational Therapy',
-  'Radiography',
-  'Medical Laboratory Science',
-  'Nutrition and Dietetics',
-  'Veterinary Medicine',
-  'Speech Therapy',
-  'Optometry',
-  'Health Information Management',
-
-  // Social Sciences
-  'Psychology',
-  'Sociology',
-  'Political Science',
-  'International Relations',
-  'Social Work',
-  'Anthropology',
-  'Geography',
-  'Criminology',
-  'Public Administration',
-  'Development Studies',
-
-  // Arts & Humanities
-  'English Language and Literature',
-  'History',
-  'Philosophy',
-  'Linguistics',
-  'Religious Studies',
-  'Fine Arts',
-  'Graphic Design',
-  'Fashion Design',
-  'Interior Design',
-  'Music',
-  'Theater Arts',
-  'Film and Media Studies',
-  'Creative Writing',
-  'Art History',
-
-  // Law
-  'Law (LLB)',
-  'Corporate Law',
-  'Criminal Law',
-  'International Law',
-  'Human Rights Law',
-
-  // Education
-  'Education',
-  'Early Childhood Education',
-  'Special Education',
-  'Educational Psychology',
-  'Curriculum and Instruction',
-  'Educational Technology',
-
-  // Architecture & Planning
-  'Architecture',
-  'Urban Planning',
-  'Landscape Architecture',
-  'Quantity Surveying',
-  'Building Technology',
-
-  // Agriculture
-  'Agriculture',
-  'Agricultural Economics',
-  'Animal Science',
-  'Crop Science',
-  'Food Science and Technology',
-  'Fisheries',
-  'Forestry',
-
-  // Communication & Media
-  'Mass Communication',
-  'Journalism',
-  'Public Relations',
-  'Broadcasting',
-  'Digital Media',
-  'Advertising',
-
-  // Other Programs
-  'Library and Information Science',
-  'Aviation',
-  'Actuarial Science',
-  'Insurance',
-  'Banking and Finance',
-  'Logistics and Transportation'
+  'Graphics Design',
+  'UI/UX Design',
+  'Data Science',
+  'Artificial Intelligence',
+  'Digital Marketing',
+  'Cybersecurity',
+  'Video Editing',
+  'Content Creation'
 ];
 
 const StudentDashboard = () => {
@@ -203,6 +50,8 @@ const StudentDashboard = () => {
         setFetchingApplication(true);
         const application = await applicantService.getMyApplication();
         setExistingApplication(application);
+        // Cache application data to localStorage for CourseEnrollment page
+        localStorage.setItem('studentApplication', JSON.stringify(application));
       } catch (err) {
         // No existing application found, that's okay
         console.log('No existing application found');
@@ -380,57 +229,57 @@ const StudentDashboard = () => {
             </div>
           </header>
 
-          <main className="p-6">
+          <main className="p-8">
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-primary bg-opacity-10 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary bg-opacity-10 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
                     </svg>
                   </div>
                 </div>
-                <p className="text-xs font-semibold text-text-secondary mb-1">Program</p>
-                <p className="text-sm font-bold text-text truncate">{existingApplication.program}</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-2">Program</p>
+                <p className="text-lg font-black text-text truncate">{existingApplication.program}</p>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-success bg-opacity-10 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
+              <div className="bg-white rounded-xl shadow-sm border-2 border-success p-6 hover:shadow-md transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-success bg-opacity-10 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-success" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   </div>
                 </div>
-                <p className="text-xs font-semibold text-text-secondary mb-1">Current GPA</p>
-                <p className="text-2xl font-black text-text">{calculateGPA() || '0.00'}</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-2">Current GPA</p>
+                <p className="text-3xl font-black text-success">{calculateGPA() || '0.00'}</p>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                       <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
                     </svg>
                   </div>
                 </div>
-                <p className="text-xs font-semibold text-text-secondary mb-1">Enrolled Courses</p>
-                <p className="text-2xl font-black text-text">{enrolledCourses.length}</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-2">Enrolled Courses</p>
+                <p className="text-3xl font-black text-purple-600">{enrolledCourses.length}</p>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-warning" fill="currentColor" viewBox="0 0 20 20">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-warning" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
                     </svg>
                   </div>
                 </div>
-                <p className="text-xs font-semibold text-text-secondary mb-1">Pending Fees</p>
-                <p className="text-lg font-black text-text">₦70,000</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-2">Pending Fees</p>
+                <p className="text-xl font-black text-warning">₦70,000</p>
               </div>
             </div>
 
@@ -438,8 +287,8 @@ const StudentDashboard = () => {
               {/* Academic Overview */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Current Courses */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-5 py-4 border-b border-gray-200">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                  <div className="px-6 py-5 border-b border-gray-200">
                     <h3 className="text-lg font-bold text-text">Current Courses</h3>
                   </div>
                   <div className="p-5">
@@ -482,34 +331,37 @@ const StudentDashboard = () => {
                   </div>
                 </div>
 
-                {/* Recent Activity */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-5 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-bold text-text">Recent Activity</h3>
+                {/* Quick Stats */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                  <div className="px-6 py-5 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-text">Program Progress</h3>
                   </div>
-                  <div className="p-5">
-                    <div className="space-y-3">
-                      {[
-                        { action: 'Assignment submitted', course: 'CS201', time: '2 hours ago', type: 'success' },
-                        { action: 'Quiz completed', course: 'MATH301', time: '1 day ago', type: 'success' },
-                        { action: 'New material posted', course: 'ENG102', time: '2 days ago', type: 'info' },
-                        { action: 'Grade published', course: 'PHY201', time: '3 days ago', type: 'success' }
-                      ].map((activity, idx) => (
-                        <div key={idx} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                            activity.type === 'success' ? 'bg-success bg-opacity-10' : 'bg-blue-100'
-                          }`}>
-                            <svg className={`w-4 h-4 ${activity.type === 'success' ? 'text-success' : 'text-blue-600'}`} fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm text-text">{activity.action}</p>
-                            <p className="text-xs text-text-secondary">{activity.course} • {activity.time}</p>
+                  <div className="p-6">
+                    {enrolledCourses.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-text-secondary text-sm mb-2 font-semibold">No course progress yet</p>
+                        <p className="text-xs text-text-secondary">Enroll in courses to track your progress</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-5 bg-white border-2 border-primary rounded-xl">
+                          <div>
+                            <p className="text-sm font-bold text-text-secondary mb-1">Total Credits Enrolled</p>
+                            <p className="text-3xl font-black text-primary">
+                              {enrolledCourses.reduce((sum, c) => sum + c.credits, 0)}
+                            </p>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                        <div className="flex items-center justify-between p-5 bg-white border-2 border-success rounded-xl">
+                          <div>
+                            <p className="text-sm font-bold text-text-secondary mb-1">Average Progress</p>
+                            <p className="text-3xl font-black text-success">
+                              {Math.round(enrolledCourses.reduce((sum, c) => sum + (c.progress || 0), 0) / enrolledCourses.length)}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -517,8 +369,8 @@ const StudentDashboard = () => {
               {/* Sidebar Info */}
               <div className="space-y-6">
                 {/* Student Info */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                  <h3 className="text-lg font-bold text-text mb-4">Student Information</h3>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-bold text-text mb-5">Student Information</h3>
                   <div className="space-y-3">
                     <div>
                       <p className="text-xs font-semibold text-text-secondary mb-1">Full Name</p>
@@ -543,37 +395,27 @@ const StudentDashboard = () => {
                   </div>
                 </div>
 
-                {/* Upcoming Events */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                  <h3 className="text-lg font-bold text-text mb-4">Upcoming Events</h3>
-                  <div className="space-y-3">
-                    {[
-                      { title: 'Midterm Exams', date: 'Mar 10-14', type: 'exam' },
-                      { title: 'Assignment Due', date: 'Feb 28', type: 'deadline' },
-                      { title: 'Spring Break', date: 'Mar 17-21', type: 'holiday' }
-                    ].map((event, idx) => (
-                      <div key={idx} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                          event.type === 'exam' ? 'bg-red-100' : event.type === 'deadline' ? 'bg-yellow-100' : 'bg-green-100'
-                        }`}>
-                          <svg className={`w-4 h-4 ${
-                            event.type === 'exam' ? 'text-red-600' : event.type === 'deadline' ? 'text-warning' : 'text-success'
-                          }`} fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-text">{event.title}</p>
-                          <p className="text-xs text-text-secondary">{event.date}</p>
-                        </div>
-                      </div>
-                    ))}
+                {/* Program Info */}
+                <div className="bg-white rounded-xl shadow-sm border-2 border-primary p-6">
+                  <h3 className="text-lg font-bold text-text mb-4">Your Program</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-2">Enrolled In</p>
+                      <p className="text-lg font-black text-primary">{existingApplication.program}</p>
+                    </div>
+                    <div className="pt-4 border-t border-gray-200">
+                      <p className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-2">Courses to Complete</p>
+                      <p className="text-sm font-bold text-text">10 courses total</p>
+                      <p className="text-xs text-text-secondary mt-1 font-semibold">
+                        {enrolledCourses.length} enrolled • {10 - enrolledCourses.length} remaining
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
-                  <h3 className="text-sm font-bold text-primary mb-3">Quick Actions</h3>
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                  <h3 className="text-sm font-bold text-primary mb-4">Quick Actions</h3>
                   <div className="space-y-2 text-sm text-text">
                     <p className="flex items-center">
                       <svg className="w-4 h-4 text-primary mr-2" fill="currentColor" viewBox="0 0 20 20">
