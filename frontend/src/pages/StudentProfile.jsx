@@ -22,11 +22,55 @@ const StudentProfile = () => {
     emergencyRelationship: ''
   });
 
-  // Load saved profile data from localStorage
+  // Load student application data and merge with profile data
   useEffect(() => {
-    const savedProfile = localStorage.getItem(`profile_${user?.id}`);
-    if (savedProfile) {
-      setFormData(JSON.parse(savedProfile));
+    if (user?.id) {
+      // First, get the application data (which has the program)
+      const cachedApplication = localStorage.getItem('studentApplication');
+      let applicationData = {};
+
+      if (cachedApplication) {
+        try {
+          applicationData = JSON.parse(cachedApplication);
+          console.log('Application data loaded:', applicationData);
+        } catch (error) {
+          console.error('Error parsing application data:', error);
+        }
+      } else {
+        console.warn('No studentApplication found in localStorage');
+      }
+
+      // Then get any saved profile updates
+      const savedProfile = localStorage.getItem(`profile_${user?.id}`);
+      let profileData = {};
+
+      if (savedProfile) {
+        try {
+          profileData = JSON.parse(savedProfile);
+          console.log('Profile data loaded:', profileData);
+        } catch (error) {
+          console.error('Error parsing profile data:', error);
+        }
+      }
+
+      // Merge data: application data (base) + profile updates (override) + user data (email, names)
+      const mergedData = {
+        firstName: profileData.firstName || user?.firstName || applicationData.firstName || '',
+        lastName: profileData.lastName || user?.lastName || applicationData.lastName || '',
+        email: user?.email || applicationData.email || '',
+        phone: profileData.phone || applicationData.phone || '',
+        address: profileData.address || applicationData.address || '',
+        dateOfBirth: profileData.dateOfBirth || applicationData.dateOfBirth || '',
+        nationality: profileData.nationality || applicationData.nationality || 'Nigerian',
+        stateOfOrigin: profileData.stateOfOrigin || applicationData.stateOfOrigin || '',
+        program: applicationData.program || profileData.program || '', // Always prioritize program from application
+        emergencyContact: profileData.emergencyContact || '',
+        emergencyPhone: profileData.emergencyPhone || '',
+        emergencyRelationship: profileData.emergencyRelationship || ''
+      };
+
+      console.log('Final merged form data:', mergedData);
+      setFormData(mergedData);
     }
   }, [user]);
 
@@ -41,33 +85,58 @@ const StudentProfile = () => {
   };
 
   const handleSave = () => {
-    // Save to localStorage
-    localStorage.setItem(`profile_${user?.id}`, JSON.stringify(formData));
+    // Get the current application data to preserve the program
+    const cachedApplication = localStorage.getItem('studentApplication');
+    let applicationData = {};
+
+    if (cachedApplication) {
+      applicationData = JSON.parse(cachedApplication);
+    }
+
+    // Save profile updates to localStorage (excluding program which is read-only)
+    const profileDataToSave = {
+      ...formData,
+      program: applicationData.program // Always preserve program from application
+    };
+
+    localStorage.setItem(`profile_${user?.id}`, JSON.stringify(profileDataToSave));
     setIsEditing(false);
     showAlert('Profile updated successfully!');
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    const savedProfile = localStorage.getItem(`profile_${user?.id}`);
-    if (savedProfile) {
-      setFormData(JSON.parse(savedProfile));
-    } else {
-      setFormData({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        email: user?.email || '',
-        phone: '',
-        address: '',
-        dateOfBirth: '',
-        nationality: 'Nigerian',
-        stateOfOrigin: '',
-        program: '',
-        emergencyContact: '',
-        emergencyPhone: '',
-        emergencyRelationship: ''
-      });
+
+    // Reload data from localStorage (same logic as useEffect)
+    const cachedApplication = localStorage.getItem('studentApplication');
+    let applicationData = {};
+
+    if (cachedApplication) {
+      applicationData = JSON.parse(cachedApplication);
     }
+
+    const savedProfile = localStorage.getItem(`profile_${user?.id}`);
+    let profileData = {};
+
+    if (savedProfile) {
+      profileData = JSON.parse(savedProfile);
+    }
+
+    // Restore original data
+    setFormData({
+      firstName: profileData.firstName || user?.firstName || applicationData.firstName || '',
+      lastName: profileData.lastName || user?.lastName || applicationData.lastName || '',
+      email: user?.email || applicationData.email || '',
+      phone: profileData.phone || applicationData.phone || '',
+      address: profileData.address || applicationData.address || '',
+      dateOfBirth: profileData.dateOfBirth || applicationData.dateOfBirth || '',
+      nationality: profileData.nationality || applicationData.nationality || 'Nigerian',
+      stateOfOrigin: profileData.stateOfOrigin || applicationData.stateOfOrigin || '',
+      program: applicationData.program || '', // Always use program from application
+      emergencyContact: profileData.emergencyContact || '',
+      emergencyPhone: profileData.emergencyPhone || '',
+      emergencyRelationship: profileData.emergencyRelationship || ''
+    });
   };
 
   return (
@@ -231,7 +300,7 @@ const StudentProfile = () => {
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-text font-semibold text-sm">
-                      {formData.phone}
+                      {formData.phone || 'Not Set'}
                     </p>
                   )}
                 </div>
@@ -252,11 +321,13 @@ const StudentProfile = () => {
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-text font-semibold text-sm">
-                      {new Date(formData.dateOfBirth).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                      {formData.dateOfBirth
+                        ? new Date(formData.dateOfBirth).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })
+                        : 'Not Set'}
                     </p>
                   )}
                 </div>
@@ -298,7 +369,7 @@ const StudentProfile = () => {
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-text font-semibold text-sm">
-                      {formData.stateOfOrigin}
+                      {formData.stateOfOrigin || 'Not Set'}
                     </p>
                   )}
                 </div>
@@ -331,7 +402,7 @@ const StudentProfile = () => {
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-text font-semibold text-sm">
-                      {formData.address}
+                      {formData.address || 'Not Set'}
                     </p>
                   )}
                 </div>
@@ -363,7 +434,7 @@ const StudentProfile = () => {
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-text font-semibold text-sm">
-                      {formData.emergencyContact}
+                      {formData.emergencyContact || 'Not Set'}
                     </p>
                   )}
                 </div>
@@ -384,7 +455,7 @@ const StudentProfile = () => {
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-text font-semibold text-sm">
-                      {formData.emergencyPhone}
+                      {formData.emergencyPhone || 'Not Set'}
                     </p>
                   )}
                 </div>
@@ -405,7 +476,7 @@ const StudentProfile = () => {
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-text font-semibold text-sm">
-                      {formData.emergencyRelationship}
+                      {formData.emergencyRelationship || 'Not Set'}
                     </p>
                   )}
                 </div>

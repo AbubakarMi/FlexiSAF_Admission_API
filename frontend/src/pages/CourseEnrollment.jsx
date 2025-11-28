@@ -9,7 +9,7 @@ import { BookOpen, Clock, Users, CheckCircle, Search, AlertCircle, X } from 'luc
 const CourseEnrollment = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { enrolledCourses, enrollInMultipleCourses, isEnrolled, unenrollFromCourse } = useEnrollment();
+  const { enrolledCourses, enrollInMultipleCourses, isEnrolled, unenrollFromCourse, isCoursePaid } = useEnrollment();
 
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,6 +98,8 @@ const CourseEnrollment = () => {
     const result = unenrollFromCourse(courseId);
     if (result.success) {
       showAlert(result.message, 'success');
+    } else {
+      showAlert(result.message, 'error');
     }
   };
 
@@ -201,12 +203,18 @@ const CourseEnrollment = () => {
                         <div className="px-3 py-1.5 bg-success bg-opacity-10 border border-success border-opacity-20 rounded-lg">
                           <p className="text-xs font-bold text-success">ENROLLED</p>
                         </div>
-                        <button
-                          onClick={() => handleUnenroll(course.id)}
-                          className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors"
-                        >
-                          Drop
-                        </button>
+                        {!isCoursePaid(course.id) ? (
+                          <button
+                            onClick={() => handleUnenroll(course.id)}
+                            className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors"
+                          >
+                            Drop
+                          </button>
+                        ) : (
+                          <div className="px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg">
+                            <p className="text-xs font-bold text-gray-500">PAID</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

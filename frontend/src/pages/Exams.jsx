@@ -133,8 +133,14 @@ const Exams = () => {
   const startExam = (course, type) => {
     // Check if exam already taken
     if (type === 'midterm' && course.midterm) {
-      showAlert('You have already completed the midterm exam for this course', 'error');
-      return;
+      // Allow retake if score is below 75%
+      const midtermScore = course.midterm.score || 0;
+      if (midtermScore >= 75) {
+        showAlert(`You have already passed the midterm exam with ${midtermScore}%. You cannot retake it.`, 'error');
+        return;
+      } else {
+        showAlert(`Retaking midterm exam. Previous score: ${midtermScore}%. You need 75% to pass.`, 'info');
+      }
     }
     if (type === 'final' && course.finalExam) {
       showAlert('You have already completed the final exam for this course', 'error');
@@ -228,7 +234,11 @@ const Exams = () => {
 
   const getExamStatus = (course, type) => {
     if (type === 'midterm') {
-      return course.midterm ? 'completed' : 'available';
+      if (!course.midterm) return 'available';
+      // If scored below 75%, allow retake
+      const midtermScore = course.midterm.score || 0;
+      if (midtermScore < 75) return 'retake';
+      return 'completed';
     } else {
       if (course.finalExam) return 'completed';
 
@@ -261,6 +271,19 @@ const Exams = () => {
             {score !== null && (
               <span className="px-3 py-1 bg-primary bg-opacity-10 border border-primary border-opacity-20 rounded-lg text-xs font-bold text-primary">
                 {score}%
+              </span>
+            )}
+          </div>
+        );
+      case 'retake':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 bg-warning bg-opacity-10 border border-warning border-opacity-20 rounded-lg text-xs font-bold text-warning">
+              RETAKE AVAILABLE
+            </span>
+            {score !== null && (
+              <span className="px-3 py-1 bg-red-100 border border-red-200 rounded-lg text-xs font-bold text-red-700">
+                {score}% (Need 75%)
               </span>
             )}
           </div>
@@ -556,6 +579,14 @@ const Exams = () => {
                             className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg font-bold hover:shadow-lg transition-all text-sm"
                           >
                             Start Midterm
+                          </button>
+                        )}
+                        {midtermStatus === 'retake' && (
+                          <button
+                            onClick={() => startExam(course, 'midterm')}
+                            className="w-full px-4 py-2 bg-warning text-white rounded-lg font-bold hover:shadow-lg transition-all text-sm"
+                          >
+                            Retake Midterm
                           </button>
                         )}
                         {midtermStatus === 'completed' && (
