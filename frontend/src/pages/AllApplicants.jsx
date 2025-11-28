@@ -22,7 +22,12 @@ import {
   Clock,
   Trash2,
   CheckCheck,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Ban,
+  Users,
+  FileCheck,
+  UserCheck
 } from 'lucide-react';
 
 const AllApplicants = () => {
@@ -38,6 +43,7 @@ const AllApplicants = () => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [alert, setAlert] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, action: null, title: '', message: '', type: 'warning' });
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'review', 'admitted'
 
   useEffect(() => {
     fetchApplicants();
@@ -61,12 +67,33 @@ const AllApplicants = () => {
     }
   };
 
-  const filteredApplicants = applicants.filter(applicant => {
-    const matchesSearch = (applicant.firstName + ' ' + applicant.lastName).toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || applicant.status === statusFilter;
-    const matchesProgram = !programFilter || applicant.program?.toLowerCase().includes(programFilter.toLowerCase());
-    return matchesSearch && matchesStatus && matchesProgram;
-  });
+  const getFilteredByTab = () => {
+    let filtered = applicants;
+
+    // Filter by tab
+    if (activeTab === 'review') {
+      filtered = filtered.filter(app => app.status === 'IN_REVIEW');
+    } else if (activeTab === 'admitted') {
+      filtered = filtered.filter(app => app.status === 'ACCEPTED');
+    }
+
+    // Apply search and filters
+    filtered = filtered.filter(applicant => {
+      const matchesSearch = (applicant.firstName + ' ' + applicant.lastName).toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'ALL' || applicant.status === statusFilter;
+      const matchesProgram = !programFilter || applicant.program?.toLowerCase().includes(programFilter.toLowerCase());
+      return matchesSearch && matchesStatus && matchesProgram;
+    });
+
+    return filtered;
+  };
+
+  const filteredApplicants = getFilteredByTab();
+
+  // Get counts for each tab
+  const allCount = applicants.length;
+  const reviewCount = applicants.filter(app => app.status === 'IN_REVIEW').length;
+  const admittedCount = applicants.filter(app => app.status === 'ACCEPTED').length;
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -85,6 +112,14 @@ const AllApplicants = () => {
       case 'ACCEPTED': return <CheckCircle className="w-4 h-4" />;
       case 'REJECTED': return <XCircle className="w-4 h-4" />;
       default: return null;
+    }
+  };
+
+  const getTabColor = () => {
+    switch (activeTab) {
+      case 'review': return 'blue';
+      case 'admitted': return 'green';
+      default: return 'primary';
     }
   };
 
@@ -157,8 +192,8 @@ const AllApplicants = () => {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Accept Application',
-      message: 'Are you sure you want to accept this application? The applicant will be moved to the Admitted list.',
+      title: 'Accept & Admit Application',
+      message: 'Are you sure you want to accept this application? The applicant will be admitted.',
       type: 'success',
       action: async () => {
         setUpdatingStatus(true);
@@ -170,10 +205,39 @@ const AllApplicants = () => {
           await fetchApplicants();
           setShowModal(false);
           setSelectedApplicant(null);
-          showAlert('Applicant has been accepted and moved to Admitted', 'success');
+          showAlert('Applicant has been accepted and admitted', 'success');
         } catch (error) {
           console.error('Error accepting applicant:', error);
           showAlert('Failed to accept applicant', 'error');
+        } finally {
+          setUpdatingStatus(false);
+        }
+      }
+    });
+  };
+
+  const handleSuspend = () => {
+    if (!selectedApplicant) return;
+
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Suspend Student',
+      message: 'Are you sure you want to suspend this student? They will be moved to suspended status.',
+      type: 'danger',
+      action: async () => {
+        setUpdatingStatus(true);
+        try {
+          await applicantService.updateApplicant(selectedApplicant.id, {
+            status: 'SUSPENDED',
+            version: selectedApplicant.version
+          });
+          await fetchApplicants();
+          setShowModal(false);
+          setSelectedApplicant(null);
+          showAlert('Student has been suspended', 'success');
+        } catch (error) {
+          console.error('Error suspending student:', error);
+          showAlert('Failed to suspend student', 'error');
         } finally {
           setUpdatingStatus(false);
         }
@@ -249,6 +313,66 @@ const AllApplicants = () => {
                 <span>Refresh</span>
               </button>
             </div>
+
+            {/* Tabs */}
+            <div className="flex items-center space-x-2 mt-6">
+              <button
+                onClick={() => setActiveTab('all')}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center space-x-2 ${
+                  activeTab === 'all'
+                    ? 'bg-primary text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                <span>All Applicants</span>
+                <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  activeTab === 'all'
+                    ? 'bg-white text-primary'
+                    : 'bg-gray-200 text-gray-700'
+                }`}>
+                  {allCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('review')}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center space-x-2 ${
+                  activeTab === 'review'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <FileCheck className="w-4 h-4" />
+                <span>In Review</span>
+                <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  activeTab === 'review'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-200 text-gray-700'
+                }`}>
+                  {reviewCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('admitted')}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center space-x-2 ${
+                  activeTab === 'admitted'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>Admitted</span>
+                <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  activeTab === 'admitted'
+                    ? 'bg-white text-green-600'
+                    : 'bg-gray-200 text-gray-700'
+                }`}>
+                  {admittedCount}
+                </span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -277,20 +401,22 @@ const AllApplicants = () => {
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
-                >
-                  <option value="ALL">All Status</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="IN_REVIEW">In Review</option>
-                  <option value="ACCEPTED">Accepted</option>
-                  <option value="REJECTED">Rejected</option>
-                </select>
-              </div>
+              {activeTab === 'all' && (
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
+                  >
+                    <option value="ALL">All Status</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="IN_REVIEW">In Review</option>
+                    <option value="ACCEPTED">Accepted</option>
+                    <option value="REJECTED">Rejected</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
 
@@ -305,7 +431,9 @@ const AllApplicants = () => {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Program</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">GPA</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Test Score</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                    {activeTab === 'all' && (
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                    )}
                     <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -314,7 +442,11 @@ const AllApplicants = () => {
                     <tr key={applicant.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">
+                          <div className={`w-10 h-10 rounded-lg ${
+                            activeTab === 'review' ? 'bg-blue-600' :
+                            activeTab === 'admitted' ? 'bg-green-600' :
+                            'bg-primary'
+                          } text-white flex items-center justify-center font-bold text-sm`}>
                             {applicant.firstName?.charAt(0)}{applicant.lastName?.charAt(0)}
                           </div>
                           <div>
@@ -334,16 +466,22 @@ const AllApplicants = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <p className="text-sm font-semibold text-gray-900">{applicant.testScore}</p>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(applicant.status)}`}>
-                          {getStatusIcon(applicant.status)}
-                          <span>{applicant.status.replace('_', ' ')}</span>
-                        </span>
-                      </td>
+                      {activeTab === 'all' && (
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(applicant.status)}`}>
+                            {getStatusIcon(applicant.status)}
+                            <span>{applicant.status.replace('_', ' ')}</span>
+                          </span>
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <button
                           onClick={() => handleViewDetails(applicant)}
-                          className="inline-flex items-center space-x-1 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-700 transition-colors"
+                          className={`inline-flex items-center space-x-1 px-4 py-2 text-white text-sm font-semibold rounded-lg transition-colors ${
+                            activeTab === 'review' ? 'bg-blue-600 hover:bg-blue-700' :
+                            activeTab === 'admitted' ? 'bg-green-600 hover:bg-green-700' :
+                            'bg-primary hover:bg-primary-700'
+                          }`}
                         >
                           <Eye className="w-4 h-4" />
                           <span>View</span>
@@ -354,6 +492,19 @@ const AllApplicants = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* No Results */}
+            {filteredApplicants.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 font-medium">No applicants found</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  {activeTab === 'review' && 'No applicants in review stage'}
+                  {activeTab === 'admitted' && 'No admitted applicants'}
+                  {activeTab === 'all' && 'Try adjusting your filters'}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Pagination */}
@@ -386,7 +537,11 @@ const AllApplicants = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-4xl w-full shadow-2xl overflow-hidden">
             {/* Header */}
-            <div className="bg-primary px-6 py-5 flex items-center justify-between border-b-4 border-primary-700">
+            <div className={`px-6 py-5 flex items-center justify-between border-b-4 ${
+              activeTab === 'review' ? 'bg-blue-600 border-blue-700' :
+              activeTab === 'admitted' ? 'bg-green-600 border-green-700' :
+              'bg-primary border-primary-700'
+            }`}>
               <div className="flex items-center space-x-3">
                 <div className="w-14 h-14 rounded-lg bg-white text-primary flex items-center justify-center font-bold text-xl shadow-md">
                   {selectedApplicant.firstName?.charAt(0)}{selectedApplicant.lastName?.charAt(0)}
@@ -490,22 +645,71 @@ const AllApplicants = () => {
                 )}
               </div>
 
-              {/* Actions - Only show if NOT ACCEPTED */}
-              {selectedApplicant.status !== 'ACCEPTED' && (
-                <div className="border-t pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-gray-900 flex items-center">
-                      <div className="w-1 h-6 bg-primary rounded-full mr-3"></div>
-                      Review Actions
-                    </h3>
+              {/* Actions - Based on Status */}
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                    <div className="w-1 h-6 bg-primary rounded-full mr-3"></div>
+                    Actions
+                  </h3>
+                </div>
+
+                {/* IN_REVIEW Status - Show Accept & Reject */}
+                {selectedApplicant.status === 'IN_REVIEW' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={handleAccept}
+                      disabled={updatingStatus}
+                      className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                    >
+                      <CheckCircle className="w-6 h-6" />
+                      <span>Accept & Admit</span>
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus('REJECTED')}
+                      disabled={updatingStatus}
+                      className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                    >
+                      <XCircle className="w-6 h-6" />
+                      <span>Reject</span>
+                    </button>
                   </div>
+                )}
+
+                {/* ACCEPTED Status - Show Suspend Button */}
+                {selectedApplicant.status === 'ACCEPTED' && (
+                  <div className="space-y-4">
+                    <div className="bg-green-50 border-l-4 border-green-600 p-6 rounded-lg">
+                      <div className="flex items-start space-x-3">
+                        <CheckCircle className="w-6 h-6 text-green-600 mt-0.5" />
+                        <div>
+                          <h4 className="text-lg font-bold text-green-900 mb-2">Student Admitted</h4>
+                          <p className="text-sm text-green-800">
+                            This applicant has been admitted and is now a student.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleSuspend}
+                      disabled={updatingStatus}
+                      className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                    >
+                      <Ban className="w-6 h-6" />
+                      <span>Suspend Student</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Other Statuses - Show Move to Review & Reject */}
+                {selectedApplicant.status !== 'IN_REVIEW' && selectedApplicant.status !== 'ACCEPTED' && (
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => handleUpdateStatus('IN_REVIEW')}
                       disabled={updatingStatus}
                       className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                     >
-                      <Eye className="w-6 h-6" />
+                      <FileCheck className="w-6 h-6" />
                       <span>Move to Review</span>
                     </button>
                     <button
@@ -514,29 +718,11 @@ const AllApplicants = () => {
                       className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                     >
                       <XCircle className="w-6 h-6" />
-                      <span>Reject Application</span>
+                      <span>Reject</span>
                     </button>
                   </div>
-                </div>
-              )}
-
-              {/* Info message for admitted students */}
-              {selectedApplicant.status === 'ACCEPTED' && (
-                <div className="border-t pt-6">
-                  <div className="bg-green-50 border-l-4 border-green-600 p-6 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-6 h-6 text-green-600 mt-0.5" />
-                      <div>
-                        <h4 className="text-lg font-bold text-green-900 mb-2">Student Admitted</h4>
-                        <p className="text-sm text-green-800">
-                          This applicant has been admitted. No further actions are available from this page.
-                          To manage this student, please visit the <strong>Admitted Students</strong> page.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import EnrolledStudentSidebar from '../components/EnrolledStudentSidebar';
 import { useEnrollment } from '../context/EnrollmentContext';
 import { useAuth } from '../context/AuthContext';
-import { FileText, TrendingUp, Award, Download, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { useReviewer } from '../context/ReviewerContext';
+import { FileText, TrendingUp, Award, Download, ChevronDown, ChevronUp, AlertCircle, Lock, Eye } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 const GradesResults = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { enrolledCourses, calculateGPA } = useEnrollment();
+  const { areResultsPublished } = useReviewer();
   const [selectedSemester, setSelectedSemester] = useState('Spring 2025');
   const [expandedCourse, setExpandedCourse] = useState(null);
   const [alert, setAlert] = useState(null);
@@ -454,15 +456,26 @@ const GradesResults = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <div className="text-right">
-                          <p className="text-xs text-text-secondary mb-0.5">Overall</p>
-                          <p className={`text-lg font-black ${course.overall !== null ? getScoreColor(course.overall) : 'text-gray-400'}`}>
-                            {course.overall !== null ? `${course.overall}%` : 'N/A'}
-                          </p>
-                        </div>
-                        <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${course.grade ? getGradeColor(course.grade) : 'bg-gray-100 text-gray-500'}`}>
-                          {course.grade || 'Pending'}
-                        </div>
+                        {!areResultsPublished(course.id) ? (
+                          <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4 text-orange-600" />
+                            <div className="px-3 py-1.5 rounded-lg font-bold text-sm bg-orange-100 text-orange-700">
+                              Pending
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="text-right">
+                              <p className="text-xs text-text-secondary mb-0.5">Overall</p>
+                              <p className={`text-lg font-black ${course.overall !== null ? getScoreColor(course.overall) : 'text-gray-400'}`}>
+                                {course.overall !== null ? `${course.overall}%` : 'N/A'}
+                              </p>
+                            </div>
+                            <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${course.grade ? getGradeColor(course.grade) : 'bg-gray-100 text-gray-500'}`}>
+                              {course.grade || 'Pending'}
+                            </div>
+                          </>
+                        )}
                         {expandedCourse === course.id ? (
                           <ChevronUp className="w-5 h-5 text-gray-400" />
                         ) : (
@@ -475,7 +488,15 @@ const GradesResults = () => {
                   {/* Expanded Details */}
                   {expandedCourse === course.id && (
                     <div className="border-t border-gray-200 p-4 bg-gray-50">
-                      {course.overall === null ? (
+                      {!areResultsPublished(course.id) ? (
+                        <div className="text-center py-8">
+                          <Lock className="w-12 h-12 text-orange-400 mx-auto mb-3" />
+                          <h4 className="text-sm font-bold text-orange-900 mb-1">Results Pending Publication</h4>
+                          <p className="text-xs text-orange-700">
+                            Your results for this course are being reviewed by the reviewer. Grades will be visible once published.
+                          </p>
+                        </div>
+                      ) : course.overall === null ? (
                         <div className="text-center py-8">
                           <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                           <h4 className="text-sm font-bold text-gray-900 mb-1">No Assessment Data Available</h4>

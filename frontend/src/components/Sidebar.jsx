@@ -5,11 +5,17 @@ import {
   LayoutDashboard,
   Users,
   ClipboardCheck,
-  UserCheck,
+  Award,
   LogOut,
   GraduationCap,
   ChevronRight,
-  FileDown
+  FileDown,
+  BookOpen,
+  DollarSign,
+  Calendar,
+  BarChart3,
+  Bell,
+  Settings
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -26,32 +32,52 @@ const Sidebar = () => {
     {
       name: 'Dashboard',
       icon: LayoutDashboard,
-      path: '/dashboard',
-      badge: null
+      path: '/dashboard'
     },
     {
-      name: 'All Applicants',
+      name: 'Applicants',
       icon: Users,
-      path: '/dashboard/applicants',
-      badge: null
+      path: '/dashboard/applicants'
     },
     {
-      name: 'Review',
+      name: 'Students',
+      icon: GraduationCap,
+      path: '/dashboard/students'
+    },
+    {
+      name: 'Courses & Calendar',
+      icon: BookOpen,
+      path: '/dashboard/courses'
+    },
+    {
+      name: 'Exam Control',
       icon: ClipboardCheck,
-      path: '/dashboard/review',
-      badge: null
+      path: '/dashboard/exams'
     },
     {
-      name: 'Admitted',
-      icon: UserCheck,
-      path: '/dashboard/admitted',
-      badge: null
+      name: 'Results',
+      icon: Award,
+      path: '/dashboard/results'
     },
     {
-      name: 'Reports',
-      icon: FileDown,
-      path: '/dashboard/export',
-      badge: null
+      name: 'Payments',
+      icon: DollarSign,
+      path: '/dashboard/payments'
+    },
+    {
+      name: 'Analytics & Reports',
+      icon: BarChart3,
+      path: '/dashboard/analytics'
+    },
+    {
+      name: 'Announcements',
+      icon: Bell,
+      path: '/dashboard/announcements'
+    },
+    {
+      name: 'Settings',
+      icon: Settings,
+      path: '/dashboard/settings'
     }
   ];
 

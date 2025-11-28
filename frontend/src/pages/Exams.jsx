@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import EnrolledStudentSidebar from '../components/EnrolledStudentSidebar';
 import { useEnrollment } from '../context/EnrollmentContext';
-import { FileText, CheckCircle, Clock, AlertCircle, Award, BookOpen, X } from 'lucide-react';
+import { useReviewer } from '../context/ReviewerContext';
+import { FileText, CheckCircle, Clock, AlertCircle, Award, BookOpen, X, Lock } from 'lucide-react';
 
 const Exams = () => {
   const { enrolledCourses, updateCourseAssessment, updateCourseProgress } = useEnrollment();
+  const { isMidtermPublished, isFinalPublished } = useReviewer();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [examType, setExamType] = useState(null); // 'midterm' or 'final'
   const [answers, setAnswers] = useState({});
@@ -234,12 +236,22 @@ const Exams = () => {
 
   const getExamStatus = (course, type) => {
     if (type === 'midterm') {
+      // Check if reviewer has published the midterm exam
+      if (!isMidtermPublished(course.id)) {
+        return 'unpublished';
+      }
+
       if (!course.midterm) return 'available';
       // If scored below 75%, allow retake
       const midtermScore = course.midterm.score || 0;
       if (midtermScore < 75) return 'retake';
       return 'completed';
     } else {
+      // Check if reviewer has published the final exam
+      if (!isFinalPublished(course.id)) {
+        return 'unpublished';
+      }
+
       if (course.finalExam) return 'completed';
 
       const hasAssignments = (course.assignments || []).length > 0;
@@ -293,6 +305,15 @@ const Exams = () => {
           <span className="px-3 py-1 bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold text-blue-700">
             AVAILABLE
           </span>
+        );
+      case 'unpublished':
+        return (
+          <div className="flex items-center gap-2">
+            <Lock className="w-4 h-4 text-orange-600" />
+            <span className="px-3 py-1 bg-orange-100 border border-orange-200 rounded-lg text-xs font-bold text-orange-700">
+              AWAITING PUBLICATION
+            </span>
+          </div>
         );
       case 'locked':
         return (
@@ -589,6 +610,14 @@ const Exams = () => {
                             Retake Midterm
                           </button>
                         )}
+                        {midtermStatus === 'unpublished' && (
+                          <div className="px-4 py-2 bg-orange-100 border border-orange-200 rounded-lg">
+                            <p className="text-xs font-semibold text-orange-700 text-center flex items-center justify-center gap-2">
+                              <Lock className="w-3 h-3" />
+                              Awaiting Reviewer Publication
+                            </p>
+                          </div>
+                        )}
                         {midtermStatus === 'completed' && (
                           <div className="px-4 py-2 bg-success bg-opacity-10 border border-success border-opacity-20 rounded-lg text-center">
                             <p className="text-xs font-bold text-success">Completed</p>
@@ -614,6 +643,14 @@ const Exams = () => {
                         {finalStatus === 'completed' && (
                           <div className="px-4 py-2 bg-success bg-opacity-10 border border-success border-opacity-20 rounded-lg text-center">
                             <p className="text-xs font-bold text-success">Completed</p>
+                          </div>
+                        )}
+                        {finalStatus === 'unpublished' && (
+                          <div className="px-4 py-2 bg-orange-100 border border-orange-200 rounded-lg">
+                            <p className="text-xs font-semibold text-orange-700 text-center flex items-center justify-center gap-2">
+                              <Lock className="w-3 h-3" />
+                              Awaiting Reviewer Publication
+                            </p>
                           </div>
                         )}
                         {finalStatus === 'locked' && (

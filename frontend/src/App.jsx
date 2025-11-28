@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { EnrollmentProvider } from './context/EnrollmentContext';
+import { ReviewerProvider } from './context/ReviewerContext';
 import PrivateRoute from './components/PrivateRoute';
 import Home from './pages/Home';
 import Register from './pages/Register';
@@ -9,8 +10,6 @@ import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import DashboardOverview from './pages/DashboardOverview';
 import AllApplicants from './pages/AllApplicants';
-import ReviewApplicants from './pages/ReviewApplicants';
-import AdmittedStudents from './pages/AdmittedStudents';
 import ApplicantDetails from './pages/ApplicantDetails';
 import ComparisonView from './pages/ComparisonView';
 import ExportReport from './pages/ExportReport';
@@ -20,17 +19,20 @@ import GradesResults from './pages/GradesResults';
 import FeePayment from './pages/FeePayment';
 import StudentProfile from './pages/StudentProfile';
 import Exams from './pages/Exams';
+import ExamControl from './pages/ExamControl';
+import ResultPublisher from './pages/ResultPublisher';
 
 function App() {
   return (
     <AuthProvider>
       <EnrollmentProvider>
-        <Router>
-          <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
+        <ReviewerProvider>
+          <Router>
+            <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
 
           {/* Protected Routes - Student */}
           <Route
@@ -118,18 +120,18 @@ function App() {
             }
           />
           <Route
-            path="/dashboard/review"
+            path="/dashboard/exams"
             element={
               <PrivateRoute>
-                <ReviewApplicants />
+                <ExamControl />
               </PrivateRoute>
             }
           />
           <Route
-            path="/dashboard/admitted"
+            path="/dashboard/results"
             element={
               <PrivateRoute>
-                <AdmittedStudents />
+                <ResultPublisher />
               </PrivateRoute>
             }
           />
@@ -162,6 +164,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+        </ReviewerProvider>
       </EnrollmentProvider>
     </AuthProvider>
   );
