@@ -11,13 +11,16 @@ import {
   GraduationCap,
   LogOut,
   ChevronRight,
-  CheckCircle
+  CheckCircle,
+  ClipboardCheck
 } from 'lucide-react';
+import { useEnrollment } from '../context/EnrollmentContext';
 
 const EnrolledStudentSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { hasAnyPaidCourses } = useEnrollment();
 
   const handleLogout = () => {
     logout();
@@ -48,6 +51,13 @@ const EnrolledStudentSidebar = () => {
       icon: FileText,
       path: '/enrolled/grades',
       badge: null
+    },
+    {
+      name: 'Exams',
+      icon: ClipboardCheck,
+      path: '/enrolled/exams',
+      badge: hasAnyPaidCourses() ? 'NEW' : null,
+      requiresPayment: true
     },
     {
       name: 'Fee Payment',
@@ -108,32 +118,41 @@ const EnrolledStudentSidebar = () => {
 
       {/* Navigation Menu */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.path);
+        {menuItems
+          .filter(item => !item.requiresPayment || hasAnyPaidCourses())
+          .map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
 
-          return (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={`w-full group relative text-left px-4 py-3.5 rounded-xl transition-all duration-200 flex items-center justify-between ${
-                active
-                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-500 group-hover:text-primary'}`} strokeWidth={2.5} />
-                <span className={`font-semibold text-sm ${active ? 'text-white' : 'text-gray-700'}`}>
-                  {item.name}
-                </span>
-              </div>
-              {active && (
-                <ChevronRight className="w-4 h-4 text-white" strokeWidth={3} />
-              )}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`w-full group relative text-left px-4 py-3.5 rounded-xl transition-all duration-200 flex items-center justify-between ${
+                  active
+                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-500 group-hover:text-primary'}`} strokeWidth={2.5} />
+                  <span className={`font-semibold text-sm ${active ? 'text-white' : 'text-gray-700'}`}>
+                    {item.name}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {item.badge && (
+                    <span className="px-2 py-0.5 text-xs font-bold bg-green-500 text-white rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                  {active && (
+                    <ChevronRight className="w-4 h-4 text-white" strokeWidth={3} />
+                  )}
+                </div>
+              </button>
+            );
+          })}
       </nav>
 
       {/* Footer Actions */}

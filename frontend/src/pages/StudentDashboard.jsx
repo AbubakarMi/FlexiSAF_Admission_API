@@ -278,8 +278,8 @@ const StudentDashboard = () => {
                     </svg>
                   </div>
                 </div>
-                <p className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-2">Pending Fees</p>
-                <p className="text-xl font-black text-warning">₦70,000</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-2">Total Credits</p>
+                <p className="text-3xl font-black text-purple-600">{enrolledCourses.reduce((sum, c) => sum + c.credits, 0)}</p>
               </div>
             </div>
 
@@ -385,12 +385,12 @@ const StudentDashboard = () => {
                       <p className="text-sm font-semibold text-text break-all">{existingApplication.email}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-text-secondary mb-1">Enrollment Date</p>
-                      <p className="text-sm font-semibold text-text">January 15, 2025</p>
+                      <p className="text-xs font-semibold text-text-secondary mb-1">Program</p>
+                      <p className="text-sm font-semibold text-text">{existingApplication.program}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-text-secondary mb-1">Expected Graduation</p>
-                      <p className="text-sm font-semibold text-text">May 2029</p>
+                      <p className="text-xs font-semibold text-text-secondary mb-1">Application Status</p>
+                      <p className="text-sm font-semibold text-success">{existingApplication.status}</p>
                     </div>
                   </div>
                 </div>

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import EnrolledStudentSidebar from '../components/EnrolledStudentSidebar';
 import { Calendar, Clock, MapPin, AlertCircle, FileText } from 'lucide-react';
 import { getEventsByProgram } from '../data/calendarData';
+import { useEnrollment } from '../context/EnrollmentContext';
 
 const AcademicCalendar = () => {
+  const { enrolledCourses } = useEnrollment();
   const [selectedMonth, setSelectedMonth] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [studentProgram, setStudentProgram] = useState('');
@@ -25,7 +27,30 @@ const AcademicCalendar = () => {
   }, []);
 
   // Get program-specific events
-  const academicEvents = studentProgram ? getEventsByProgram(studentProgram) : [];
+  const programEvents = studentProgram ? getEventsByProgram(studentProgram) : [];
+
+  // Filter events to only show those related to enrolled courses
+  const academicEvents = programEvents.filter(event => {
+    // Always show general events (semester events, holidays, deadlines, orientation)
+    const generalEventTypes = ['semester', 'holiday', 'deadline', 'orientation'];
+    if (generalEventTypes.includes(event.type)) {
+      return true;
+    }
+
+    // For course-specific events (exams, tests, projects, etc.), only show if related to enrolled courses
+    if (enrolledCourses.length === 0) {
+      // If no courses enrolled, don't show course-specific events
+      return false;
+    }
+
+    // Check if event is related to any enrolled course by matching course codes
+    // Event descriptions contain course codes like "WD01", "MA03", "GD02", etc.
+    const enrolledCourseCodes = enrolledCourses.map(c => c.code.toUpperCase());
+    const eventText = `${event.title} ${event.description}`.toUpperCase();
+
+    // Check if any enrolled course code appears in the event text
+    return enrolledCourseCodes.some(code => eventText.includes(code));
+  });
 
   const filteredEvents = academicEvents.filter(event => {
     const matchesMonth = selectedMonth === '' || event.month === selectedMonth;

@@ -14,14 +14,20 @@ export const useEnrollment = () => {
 export const EnrollmentProvider = ({ children }) => {
   const { user } = useAuth();
   const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [paidCourses, setPaidCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load enrolled courses from localStorage on mount
+  // Load enrolled courses and paid courses from localStorage on mount
   useEffect(() => {
     if (user) {
       const stored = localStorage.getItem(`enrollments_${user.id}`);
       if (stored) {
         setEnrolledCourses(JSON.parse(stored));
+      }
+
+      const paidStored = localStorage.getItem(`paidCourses_${user.id}`);
+      if (paidStored) {
+        setPaidCourses(JSON.parse(paidStored));
       }
     }
     setLoading(false);
@@ -34,21 +40,28 @@ export const EnrollmentProvider = ({ children }) => {
     }
   }, [enrolledCourses, user, loading]);
 
+  // Save paid courses to localStorage whenever they change
+  useEffect(() => {
+    if (user && !loading) {
+      localStorage.setItem(`paidCourses_${user.id}`, JSON.stringify(paidCourses));
+    }
+  }, [paidCourses, user, loading]);
+
   const enrollInCourse = (course) => {
     // Check if already enrolled
     if (enrolledCourses.find(c => c.id === course.id)) {
       return { success: false, message: 'Already enrolled in this course' };
     }
 
-    // Add enrollment
+    // Add enrollment without mock assessment data
     setEnrolledCourses(prev => [...prev, {
       ...course,
       enrolledDate: new Date().toISOString(),
       progress: 0,
-      assignments: generateAssignments(course),
-      tests: generateTests(course),
-      midterm: generateMidterm(),
-      finalExam: null // Final exam not yet taken
+      assignments: [], // No assignments until actually assigned
+      tests: [], // No tests until actually taken
+      midterm: null, // No midterm until taken
+      finalExam: null // No final exam until taken
     }]);
 
     return { success: true, message: 'Successfully enrolled in course' };
@@ -66,11 +79,11 @@ export const EnrollmentProvider = ({ children }) => {
     const coursesWithData = newEnrollments.map(course => ({
       ...course,
       enrolledDate: new Date().toISOString(),
-      progress: Math.floor(Math.random() * 30) + 50, // Random progress 50-80%
-      assignments: generateAssignments(course),
-      tests: generateTests(course),
-      midterm: generateMidterm(),
-      finalExam: null
+      progress: 0,
+      assignments: [], // No assignments until actually assigned
+      tests: [], // No tests until actually taken
+      midterm: null, // No midterm until taken
+      finalExam: null // No final exam until taken
     }));
 
     setEnrolledCourses(prev => [...prev, ...coursesWithData]);
@@ -82,8 +95,85 @@ export const EnrollmentProvider = ({ children }) => {
   };
 
   const unenrollFromCourse = (courseId) => {
+    // Check if course has been paid for
+    if (paidCourses.includes(courseId)) {
+      return { success: false, message: 'Cannot drop course - payment has been made' };
+    }
+
     setEnrolledCourses(prev => prev.filter(c => c.id !== courseId));
     return { success: true, message: 'Successfully unenrolled from course' };
+  };
+
+  // Mark course as paid
+  const markCourseAsPaid = (courseId) => {
+    if (!paidCourses.includes(courseId)) {
+      setPaidCourses(prev => [...prev, courseId]);
+    }
+  };
+
+  // Mark all courses as paid
+  const markAllCoursesAsPaid = () => {
+    const allCourseIds = enrolledCourses.map(c => c.id);
+    setPaidCourses(allCourseIds);
+  };
+
+  // Check if course is paid
+  const isCoursePaid = (courseId) => {
+    return paidCourses.includes(courseId);
+  };
+
+  // Check if any courses are paid
+  const hasAnyPaidCourses = () => {
+    return paidCourses.length > 0;
+  };
+
+  // Update course assessment data
+  const updateCourseAssessment = (courseId, assessmentType, data) => {
+    setEnrolledCourses(prev => prev.map(course => {
+      if (course.id === courseId) {
+        switch (assessmentType) {
+          case 'assignment':
+            return {
+              ...course,
+              assignments: [...(course.assignments || []), data]
+            };
+          case 'test':
+            return {
+              ...course,
+              tests: [...(course.tests || []), data]
+            };
+          case 'midterm':
+            return { ...course, midterm: data };
+          case 'finalExam':
+            return { ...course, finalExam: data };
+          default:
+            return course;
+        }
+      }
+      return course;
+    }));
+  };
+
+  // Update course progress
+  const updateCourseProgress = (courseId) => {
+    setEnrolledCourses(prev => prev.map(course => {
+      if (course.id === courseId) {
+        const assignments = course.assignments || [];
+        const tests = course.tests || [];
+        const hasMidterm = !!course.midterm;
+        const hasFinalExam = !!course.finalExam;
+
+        // Calculate progress based on completed assessments
+        let progress = 0;
+        if (assignments.length > 0) progress += 30;
+        if (tests.length > 0) progress += 30;
+        if (hasMidterm) progress += 20;
+        if (hasFinalExam) progress += 20;
+
+        return { ...course, progress };
+      }
+      return course;
+    }));
   };
 
   const isEnrolled = (courseId) => {
@@ -108,32 +198,17 @@ export const EnrollmentProvider = ({ children }) => {
     return totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : 0;
   };
 
-  // Helper functions
-  const generateAssignments = (course) => {
-    const count = Math.floor(Math.random() * 2) + 2; // 2-3 assignments
-    return Array.from({ length: count }, (_, i) => ({
-      name: `Assignment ${i + 1}`,
-      score: Math.floor(Math.random() * 16) + 85, // 85-100
-      weight: 10
-    }));
-  };
-
-  const generateTests = (course) => {
-    return [
-      { name: 'Test 1', score: Math.floor(Math.random() * 16) + 80, weight: 15 },
-      { name: 'Test 2', score: Math.floor(Math.random() * 16) + 80, weight: 15 }
-    ];
-  };
-
-  const generateMidterm = () => {
-    return { score: Math.floor(Math.random() * 16) + 80, weight: 20 };
-  };
-
+  // Helper function to calculate course grade from actual assessment data
   const calculateCourseGrade = (course) => {
     const assignments = course.assignments || [];
     const tests = course.tests || [];
-    const midterm = course.midterm || { score: 0, weight: 0 };
-    const finalExam = course.finalExam || { score: Math.floor(Math.random() * 16) + 85, weight: 20 };
+    const midterm = course.midterm;
+    const finalExam = course.finalExam;
+
+    // Only calculate grade if all assessments are completed
+    if (assignments.length === 0 || tests.length === 0 || !midterm || !finalExam) {
+      return null; // No grade yet - assessments not completed
+    }
 
     const assignmentAvg = assignments.reduce((sum, a) => sum + a.score, 0) / assignments.length;
     const testAvg = tests.reduce((sum, t) => sum + t.score, 0) / tests.length;
@@ -163,10 +238,17 @@ export const EnrollmentProvider = ({ children }) => {
 
   const value = {
     enrolledCourses,
+    paidCourses,
     loading,
     enrollInCourse,
     enrollInMultipleCourses,
     unenrollFromCourse,
+    markCourseAsPaid,
+    markAllCoursesAsPaid,
+    isCoursePaid,
+    hasAnyPaidCourses,
+    updateCourseAssessment,
+    updateCourseProgress,
     isEnrolled,
     getCourseById,
     calculateGPA

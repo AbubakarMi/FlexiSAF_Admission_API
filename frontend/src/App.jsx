@@ -19,6 +19,7 @@ import AcademicCalendar from './pages/AcademicCalendar';
 import GradesResults from './pages/GradesResults';
 import FeePayment from './pages/FeePayment';
 import StudentProfile from './pages/StudentProfile';
+import Exams from './pages/Exams';
 
 function App() {
   return (
@@ -87,6 +88,14 @@ function App() {
             element={
               <PrivateRoute>
                 <StudentProfile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/enrolled/exams"
+            element={
+              <PrivateRoute>
+                <Exams />
               </PrivateRoute>
             }
           />
