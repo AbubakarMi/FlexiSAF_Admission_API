@@ -21,6 +21,12 @@ import StudentProfile from './pages/StudentProfile';
 import Exams from './pages/Exams';
 import ExamControl from './pages/ExamControl';
 import ResultPublisher from './pages/ResultPublisher';
+import Students from './pages/Students';
+import CoursesCalendar from './pages/CoursesCalendar';
+import Payments from './pages/Payments';
+import AnalyticsReports from './pages/AnalyticsReports';
+import Announcements from './pages/Announcements';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -132,6 +138,54 @@ function App() {
             element={
               <PrivateRoute>
                 <ResultPublisher />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/students"
+            element={
+              <PrivateRoute>
+                <Students />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/courses"
+            element={
+              <PrivateRoute>
+                <CoursesCalendar />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/payments"
+            element={
+              <PrivateRoute>
+                <Payments />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/analytics"
+            element={
+              <PrivateRoute>
+                <AnalyticsReports />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/announcements"
+            element={
+              <PrivateRoute>
+                <Announcements />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/settings"
+            element={
+              <PrivateRoute>
+                <Settings />
               </PrivateRoute>
             }
           />

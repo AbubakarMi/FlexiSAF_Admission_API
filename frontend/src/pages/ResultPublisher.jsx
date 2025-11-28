@@ -1,23 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { useReviewer } from '../context/ReviewerContext';
-import { getAllPrograms, getCoursesByProgram } from '../data/courseData';
-import { CheckCircle, X, AlertCircle, Award, Eye, EyeOff, Search, Lock, Unlock } from 'lucide-react';
+import courseService from '../services/courseService';
+import resultService from '../services/resultService';
+import { CheckCircle, X, AlertCircle, Award, Eye, EyeOff, Search, Lock, Unlock, RefreshCw, ChevronDown, ChevronRight } from 'lucide-react';
 
 const ResultPublisher = () => {
-  const {
-    publishResults,
-    unpublishResults,
-    areResultsPublished
-  } = useReviewer();
-
-  const [selectedProgram, setSelectedProgram] = useState('Web Development');
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProgram, setSelectedProgram] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [alert, setAlert] = useState(null);
   const [expandedCourse, setExpandedCourse] = useState(null);
+  const [resultsStatus, setResultsStatus] = useState({});
+  const [courseResults, setCourseResults] = useState({});
+  const [expandedPrograms, setExpandedPrograms] = useState({});
 
-  const programs = getAllPrograms();
-  const courses = getCoursesByProgram(selectedProgram);
+  useEffect(() => {
+    fetchCourses();
+  }, [selectedProgram]);
+
+  const fetchCourses = async () => {
+    setLoading(true);
+    try {
+      const data = selectedProgram
+        ? await courseService.getCoursesByProgram(selectedProgram)
+        : await courseService.getAllCourses();
+      const coursesArray = Array.isArray(data) ? data : [];
+      setCourses(coursesArray);
+
+      // Fetch results status for each course
+      const statusMap = {};
+      for (const course of coursesArray) {
+        try {
+          const results = await resultService.getResultsByCourse(course.id);
+          statusMap[course.id] = results.published || false;
+        } catch (error) {
+          statusMap[course.id] = false;
+        }
+      }
+      setResultsStatus(statusMap);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCourseResults = async (courseId) => {
+    try {
+      const results = await resultService.getResultsByCourse(courseId);
+      setCourseResults(prev => ({ ...prev, [courseId]: results.students || [] }));
+    } catch (error) {
+      console.error('Error fetching course results:', error);
+      setCourseResults(prev => ({ ...prev, [courseId]: [] }));
+    }
+  };
+
+  // Get unique programs from courses
+  const programs = [...new Set(courses.map(c => c.program).filter(Boolean))];
 
   const filteredCourses = courses.filter(course =>
     course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -29,30 +70,55 @@ const ResultPublisher = () => {
     setTimeout(() => setAlert(null), 3000);
   };
 
-  const handlePublishResults = (courseId, courseName) => {
-    const result = publishResults(courseId);
-    showAlert(`Results published for ${courseName}. Students can now view their grades!`, 'success');
+  const handlePublishResults = async (courseId, courseName) => {
+    try {
+      await resultService.publishResults(courseId);
+      await fetchCourses();
+      showAlert(`Results published for ${courseName}. Students can now view their grades!`, 'success');
+    } catch (error) {
+      console.error('Error publishing results:', error);
+      showAlert('Failed to publish results', 'error');
+    }
   };
 
-  const handleUnpublishResults = (courseId, courseName) => {
-    const result = unpublishResults(courseId);
-    showAlert(`Results unpublished for ${courseName}.`, 'success');
+  const handleUnpublishResults = async (courseId, courseName) => {
+    try {
+      await resultService.unpublishResults(courseId);
+      await fetchCourses();
+      showAlert(`Results unpublished for ${courseName}.`, 'success');
+    } catch (error) {
+      console.error('Error unpublishing results:', error);
+      showAlert('Failed to unpublish results', 'error');
+    }
   };
 
-  const handleBatchPublish = () => {
+  const handleBatchPublish = async () => {
     let count = 0;
-    filteredCourses.forEach(course => {
+    const promises = [];
+
+    for (const course of filteredCourses) {
       if (!areResultsPublished(course.id)) {
-        publishResults(course.id);
+        promises.push(resultService.publishResults(course.id));
         count++;
       }
-    });
-
-    if (count > 0) {
-      showAlert(`Published results for ${count} courses in ${selectedProgram}!`, 'success');
-    } else {
-      showAlert(`All results already published for ${selectedProgram}.`, 'info');
     }
+
+    try {
+      await Promise.all(promises);
+      await fetchCourses();
+      if (count > 0) {
+        showAlert(`Published results for ${count} courses!`, 'success');
+      } else {
+        showAlert(`All results already published.`, 'info');
+      }
+    } catch (error) {
+      console.error('Error in batch publish:', error);
+      showAlert('Failed to publish some results', 'error');
+    }
+  };
+
+  const areResultsPublished = (courseId) => {
+    return resultsStatus[courseId] || false;
   };
 
   const getPublicationStats = () => {
@@ -67,6 +133,31 @@ const ResultPublisher = () => {
   };
 
   const stats = getPublicationStats();
+
+  const handleExpandCourse = async (courseId) => {
+    if (expandedCourse === courseId) {
+      setExpandedCourse(null);
+    } else {
+      setExpandedCourse(courseId);
+      if (!courseResults[courseId]) {
+        await fetchCourseResults(courseId);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="w-12 h-12 text-primary animate-spin mx-auto" />
+            <p className="mt-4 text-gray-600 font-medium">Loading courses...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Mock student data for demonstration
   const getMockStudentResults = (courseCode) => {
@@ -85,6 +176,25 @@ const ResultPublisher = () => {
     if (grade.startsWith('C')) return 'text-yellow-700 bg-yellow-100';
     return 'text-red-700 bg-red-100';
   };
+
+  const toggleProgram = (program) => {
+    setExpandedPrograms(prev => ({
+      ...prev,
+      [program]: !prev[program]
+    }));
+  };
+
+  const groupCoursesByProgram = () => {
+    const grouped = {};
+    filteredCourses.forEach(course => {
+      if (!grouped[course.program]) {
+        grouped[course.program] = [];
+      }
+      grouped[course.program].push(course);
+    });
+    return grouped;
+  };
+
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -119,6 +229,13 @@ const ResultPublisher = () => {
                 </p>
               </div>
               <div className="flex items-center space-x-3">
+                <button
+                  onClick={fetchCourses}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Refresh</span>
+                </button>
                 <div className="px-3 py-1.5 bg-primary bg-opacity-10 border border-primary border-opacity-20 rounded-lg">
                   <p className="text-xs font-bold text-primary">{stats.totalCourses} Courses</p>
                 </div>
@@ -202,14 +319,47 @@ const ResultPublisher = () => {
             </button>
           </div>
 
-          {/* Courses List */}
+          {/* Courses List - Grouped by Program */}
           <div>
             <h2 className="text-lg font-bold text-text mb-3">
-              Courses in {selectedProgram} ({filteredCourses.length})
+              Courses ({filteredCourses.length})
             </h2>
 
             <div className="space-y-3">
-              {filteredCourses.map(course => {
+              {Object.entries(groupCoursesByProgram()).map(([program, programCourses]) => {
+                const isProgramExpanded = expandedPrograms[program];
+                const publishedCount = programCourses.filter(c => areResultsPublished(c.id)).length;
+
+                return (
+                  <div key={program} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    {/* Program Header - Clickable Accordion */}
+                    <div
+                      onClick={() => toggleProgram(program)}
+                      className="flex items-center justify-between p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3">
+                        {isProgramExpanded ? (
+                          <ChevronDown className="w-5 h-5 text-primary" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                        )}
+                        <div className="w-10 h-10 rounded-lg bg-primary bg-opacity-10 flex items-center justify-center">
+                          <Award className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-base text-text">{program}</h3>
+                          <p className="text-xs text-text-secondary">{programCourses.length} courses</p>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-bold">
+                        Published: {publishedCount}/{programCourses.length}
+                      </div>
+                    </div>
+
+                    {/* Expanded Course List */}
+                    {isProgramExpanded && (
+                      <div className="border-t border-gray-200 bg-gray-50 p-5 space-y-3">
+                        {programCourses.map(course => {
                 const isPublished = areResultsPublished(course.id);
                 const isExpanded = expandedCourse === course.id;
                 const mockResults = getMockStudentResults(course.code);
@@ -280,7 +430,7 @@ const ResultPublisher = () => {
                       {/* Action Buttons */}
                       <div className="flex gap-3">
                         <button
-                          onClick={() => setExpandedCourse(isExpanded ? null : course.id)}
+                          onClick={() => handleExpandCourse(course.id)}
                           className="flex-1 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg font-bold hover:bg-blue-100 transition-colors text-sm"
                         >
                           {isExpanded ? 'Hide' : 'Review'} Student Results
@@ -343,6 +493,11 @@ const ResultPublisher = () => {
                             </tbody>
                           </table>
                         </div>
+                      </div>
+                    )}
+                  </div>
+                        );
+                      })}
                       </div>
                     )}
                   </div>
