@@ -8,12 +8,16 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: DATABASE_URL
-        fromDatabase:
-          name: flexisaf-admission-db
-          property: connectionString
+        value: jdbc:postgresql://dpg-d4sl2pfgi27c73bp47h0-a.virginia-postgres.render.com/flexisaf_admission_db
+      - key: DATABASE_USERNAME
+        value: flexisaf_admission_db_user
+      - key: DATABASE_PASSWORD
+        value: AKlpO5WuD1WkYfIoKf90nzoWMizsd62n
       - key: JWT_SECRET
-        generateValue: true
+        value: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
       - key: RESEND_API_KEY
-        sync: false
+        value: re_LirnJa75_QD7UDc7zG6VYekut8TVzKdtg
+      - key: CORS_ALLOWED_ORIGINS
+        value: http://localhost:5173,http://localhost:3000
     healthCheckPath: /actuator/health
     autoDeploy: true
