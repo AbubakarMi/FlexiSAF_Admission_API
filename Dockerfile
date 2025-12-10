@@ -25,7 +25,7 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Copy the built jar from the build stage
-COPY --from=build /app/target/admissions-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/admissions-system-1.0.0.jar app.jar
 
 # Expose port (Render will override this with $PORT)
 EXPOSE 8080
