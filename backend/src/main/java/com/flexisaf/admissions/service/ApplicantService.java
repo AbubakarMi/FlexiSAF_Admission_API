@@ -25,6 +25,7 @@ public class ApplicantService {
     private final ApplicantMapper applicantMapper;
     private final AIService aiService;
     private final EmailService emailService;
+    private final StudentService studentService;
 
     @Transactional
     public ApplicantDTO createApplicant(ApplicantCreateDTO createDTO) {
@@ -128,6 +129,10 @@ public class ApplicantService {
         if (updateDTO.getStatus() != null && !updateDTO.getStatus().equals(oldStatus)) {
             try {
                 if (updateDTO.getStatus() == ApplicationStatus.ACCEPTED) {
+                    // CRITICAL: Create Student record when applicant is accepted
+                    log.info("Applicant {} accepted, creating Student record", id);
+                    studentService.createStudentFromApplicant(updatedApplicant);
+
                     emailService.sendAcceptanceEmail(updatedApplicant);
                 } else if (updateDTO.getStatus() == ApplicationStatus.REJECTED) {
                     emailService.sendRejectionEmail(updatedApplicant);
@@ -135,7 +140,7 @@ public class ApplicantService {
                     emailService.sendStatusChangeEmail(updatedApplicant, updateDTO.getStatus().toString());
                 }
             } catch (Exception e) {
-                log.error("Failed to send status change email", e);
+                log.error("Failed to send status change email or create student record", e);
                 // Don't fail the entire operation if email fails
             }
         }

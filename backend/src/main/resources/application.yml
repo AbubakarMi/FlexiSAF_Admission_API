@@ -3,9 +3,9 @@ spring:
     name: admissions-system
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/Admission_Db
-    username: postgres
-    password: root
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/Admission_Db}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
 
   jpa:

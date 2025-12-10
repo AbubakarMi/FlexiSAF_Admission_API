@@ -1,6 +1,7 @@
 package com.flexisaf.admissions.service;
 
 import com.flexisaf.admissions.dto.StudentDTO;
+import com.flexisaf.admissions.entity.Applicant;
 import com.flexisaf.admissions.entity.Student;
 import com.flexisaf.admissions.entity.User;
 import com.flexisaf.admissions.exception.ResourceNotFoundException;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -100,6 +102,83 @@ public class StudentService {
 
         studentRepository.delete(student);
         log.info("Successfully deleted student with ID: {}", id);
+    }
+
+    /**
+     * CRITICAL: Creates a Student record from an accepted Applicant
+     * This bridges the gap between application and enrollment
+     */
+    @Transactional
+    public Student createStudentFromApplicant(Applicant applicant) {
+        log.info("Creating Student record from Applicant ID: {}", applicant.getId());
+
+        // Get user record
+        User user = userRepository.findByEmail(applicant.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", applicant.getEmail()));
+
+        // Check if student already exists
+        if (studentRepository.findByUserId(user.getId()).isPresent()) {
+            log.warn("Student record already exists for user ID: {}", user.getId());
+            return studentRepository.findByUserId(user.getId()).get();
+        }
+
+        // Generate student ID (e.g., STU-2025-0001)
+        String studentId = generateStudentId();
+
+        // Create student record
+        Student student = Student.builder()
+                .userId(user.getId())
+                .applicantId(applicant.getId())
+                .studentId(studentId)
+                .program(applicant.getProgram())
+                .status(Student.Status.ACTIVE)
+                .enrollmentDate(LocalDateTime.now())
+                .gpa(applicant.getGpa() != null ? applicant.getGpa() : 0.0)
+                .creditsEarned(0)
+                .creditsRequired(120) // Default credit requirement
+                .build();
+
+        Student savedStudent = studentRepository.save(student);
+        log.info("Successfully created Student ID: {} for User ID: {}", savedStudent.getStudentId(), user.getId());
+
+        return savedStudent;
+    }
+
+    /**
+     * Generate unique student ID in format STU-YYYY-XXXX
+     */
+    private String generateStudentId() {
+        int year = LocalDateTime.now().getYear();
+        long count = studentRepository.count() + 1;
+        return String.format("STU-%d-%04d", year, count);
+    }
+
+    @Transactional
+    public Student suspendStudent(Long id) {
+        log.info("Suspending student with ID: {}", id);
+
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student", "id", id));
+
+        student.setStatus(Student.Status.SUSPENDED);
+        Student saved = studentRepository.save(student);
+
+        log.info("Successfully suspended student with ID: {}", id);
+        return saved;
+    }
+
+    @Transactional
+    public Student reactivateStudent(Long id) {
+        log.info("Reactivating student with ID: {}", id);
+
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student", "id", id));
+
+        student.setStatus(Student.Status.ACTIVE);
+        Student saved = studentRepository.save(student);
+
+        log.info("Successfully reactivated student with ID: {}", id);
+        return saved;
     }
 
     // DTO Methods
