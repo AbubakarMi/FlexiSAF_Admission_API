@@ -133,7 +133,7 @@ public class StudentService {
                 .program(applicant.getProgram())
                 .status(Student.Status.ACTIVE)
                 .enrollmentDate(LocalDateTime.now())
-                .gpa(applicant.getGpa() != null ? applicant.getGpa() : 0.0)
+                .gpa(applicant.getGpa() != null ? applicant.getGpa().doubleValue() : 0.0)
                 .creditsEarned(0)
                 .creditsRequired(120) // Default credit requirement
                 .build();
