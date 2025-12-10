@@ -6,18 +6,17 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 # Set working directory
 WORKDIR /app
 
-# Copy the backend directory
+# Copy pom.xml first for better layer caching
 COPY backend/pom.xml .
-COPY backend/src ./src
-COPY backend/.mvn ./.mvn
-COPY backend/mvnw .
-COPY backend/mvnw.cmd .
 
-# Make mvnw executable
-RUN chmod +x mvnw
+# Download dependencies (cached layer)
+RUN mvn dependency:go-offline -B
+
+# Copy source code
+COPY backend/src ./src
 
 # Build the application
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests -B
 
 # Stage 2: Run the application
 FROM eclipse-temurin:17-jre-alpine
@@ -32,4 +31,4 @@ COPY --from=build /app/target/admissions-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 
 # Run the application with environment variable support
-ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-Dserver.port=${PORT}", "-jar", "app.jar"]
+CMD java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} -Dserver.port=${PORT:-8080} -jar app.jar
