@@ -31,4 +31,4 @@ COPY --from=build /app/target/admissions-system-1.0.0.jar app.jar
 EXPOSE 8080
 
 # Run the application with environment variable support
-CMD java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} -Dserver.port=${PORT:-8080} -jar app.jar
+CMD ["sh", "-c", "java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} -Dserver.port=${PORT:-8080} -jar app.jar"]
