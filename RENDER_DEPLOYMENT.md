@@ -60,11 +60,15 @@ git push -u origin main
    Click "Environment" tab and add:
    ```
    SPRING_PROFILES_ACTIVE=prod
-   DATABASE_URL=postgresql://flexisaf_admission_db_user:AKlpO5WuD1WkYfIoKf90nzoWMizsd62n@dpg-d4sl2pfgi27c73bp47h0-a.virginia-postgres.render.com/flexisaf_admission_db
+   DATABASE_URL=jdbc:postgresql://dpg-d4sl2pfgi27c73bp47h0-a.virginia-postgres.render.com/flexisaf_admission_db
+   DATABASE_USERNAME=flexisaf_admission_db_user
+   DATABASE_PASSWORD=AKlpO5WuD1WkYfIoKf90nzoWMizsd62n
    JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
    RESEND_API_KEY=re_LirnJa75_QD7UDc7zG6VYekut8TVzKdtg
    PORT=8080
    ```
+
+   **IMPORTANT:** The `DATABASE_URL` must start with `jdbc:postgresql://` (NOT just `postgresql://`)
 
 5. **Advanced Settings:**
    ```

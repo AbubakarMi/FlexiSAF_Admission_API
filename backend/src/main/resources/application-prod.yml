@@ -3,9 +3,9 @@ spring:
     name: admissions-system
 
   datasource:
-    url: ${DATABASE_URL:postgresql://flexisaf_admission_db_user:AKlpO5WuD1WkYfIoKf90nzoWMizsd62n@dpg-d4sl2pfgi27c73bp47h0-a.virginia-postgres.render.com/flexisaf_admission_db}
-    username: flexisaf_admission_db_user
-    password: AKlpO5WuD1WkYfIoKf90nzoWMizsd62n
+    url: ${DATABASE_URL:jdbc:postgresql://dpg-d4sl2pfgi27c73bp47h0-a.virginia-postgres.render.com/flexisaf_admission_db}
+    username: ${DATABASE_USERNAME:flexisaf_admission_db_user}
+    password: ${DATABASE_PASSWORD:AKlpO5WuD1WkYfIoKf90nzoWMizsd62n}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 5
