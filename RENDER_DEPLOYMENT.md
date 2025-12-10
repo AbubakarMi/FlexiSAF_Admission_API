@@ -53,7 +53,7 @@ git push -u origin main
    Branch: main
    Runtime: Java
    Build Command: cd backend && ./mvnw clean package -DskipTests
-   Start Command: cd backend && java -Dserver.port=$PORT -jar target/admissions-system-1.0.0.jar
+   Start Command: cd backend && java -Dspring.profiles.active=prod -Dserver.port=$PORT -jar target/admissions-0.0.1-SNAPSHOT.jar
    ```
 
 4. **Set Environment Variables:**

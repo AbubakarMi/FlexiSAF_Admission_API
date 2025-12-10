@@ -3,7 +3,7 @@ services:
     name: flexisaf-admission-api
     env: java
     buildCommand: cd backend && ./mvnw clean package -DskipTests
-    startCommand: cd backend && java -jar target/admissions-0.0.1-SNAPSHOT.jar
+    startCommand: cd backend && java -Dspring.profiles.active=prod -Dserver.port=$PORT -jar target/admissions-0.0.1-SNAPSHOT.jar
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
