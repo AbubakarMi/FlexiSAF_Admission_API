@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del /F /Q \"DATABASE-FIX-INSTRUCTIONS.txt\" \"SIMPLE-FIX-INSTRUCTIONS.txt\" \"fix-production-database.sql\" \"cleanup-empty-applicants.sql\" \"run-database-fix.bat\" \"run-database-fix.ps1\" 2)",
+      "Bash(del /F /Q \"README.md\" 2)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
