@@ -84,18 +84,7 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // Create an Applicant record with firstName and lastName to store user's name
-        Applicant applicant = Applicant.builder()
-                .firstName(registerRequest.getFirstName())
-                .lastName(registerRequest.getLastName())
-                .email(registerRequest.getEmail())
-                .program("") // Empty initially, will be filled when submitting application
-                .gpa(java.math.BigDecimal.ZERO)
-                .testScore(0)
-                .status(Applicant.ApplicationStatus.PENDING)
-                .build();
-
-        applicantRepository.save(applicant);
+        // Don't create Applicant record here - it should be created when they submit their application
 
         log.info("Student registered successfully: {} with name: {} {}",
                 savedUser.getEmail(),
