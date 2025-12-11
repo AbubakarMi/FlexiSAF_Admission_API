@@ -41,4 +41,8 @@ public interface ApplicantRepository extends JpaRepository<Applicant, Long> {
 
     @Query("SELECT a FROM Applicant a WHERE a.deleted = false AND a.email = :email")
     Optional<Applicant> findByEmailAndNotDeleted(@Param("email") String email);
+
+    @Query("DELETE FROM Applicant a WHERE (a.gpa = 0 OR a.gpa IS NULL) AND (a.testScore = 0 OR a.testScore IS NULL) AND (a.program IS NULL OR a.program = '' OR TRIM(a.program) = '')")
+    @org.springframework.data.jpa.repository.Modifying
+    int deleteEmptyApplicants();
 }

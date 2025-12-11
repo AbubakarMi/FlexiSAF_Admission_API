@@ -41,6 +41,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/admin/create-reviewer").permitAll()
+                        .requestMatchers("/api/admin/cleanup-empty-applicants").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/applicants").permitAll()
 
                         // Swagger/OpenAPI endpoints
