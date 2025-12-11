@@ -1,0 +1,65 @@
+DATABASE FIX INSTRUCTIONS - RUN ON RENDER
+==========================================
+
+ISSUE 1: Admin/Reviewer Cannot Log In
+--------------------------------------
+CAUSE: No reviewer account exists in the production database
+STATUS: ✓ FIXED - Reviewer account created successfully
+
+ISSUE 2: Empty Application After Registration
+---------------------------------------------
+CAUSE: Empty Applicant records were created during registration (this has been fixed in code but needs database cleanup)
+STATUS: NEEDS DATABASE CLEANUP - Run SQL script below
+
+
+HOW TO FIX (Run SQL on Render):
+================================
+
+Option A: Using Render Dashboard
+---------------------------------
+1. Go to https://dashboard.render.com
+2. Click on your database: flexisaf_admission_db
+3. Click on "Connect" button (top right)
+4. Copy the "PSQL Command" (it looks like: PGPASSWORD=xxx psql -h xxx -U flexisaf_admission_db_user flexisaf_admission_db)
+5. Open Command Prompt on Windows and run that command
+6. Once connected, copy and paste the contents of fix-production-database.sql
+7. Press Enter to execute
+
+
+Option B: Alternative - Use API Endpoint to Create Reviewer
+-----------------------------------------------------------
+You can also create a reviewer account using the API:
+
+Using PowerShell:
+$headers = @{"Content-Type"="application/json"}
+$body = '{"email":"admin@flexisaf.com","password":"admin123"}'
+Invoke-WebRequest -Uri "https://flexisaf-admission-api-backend.onrender.com/api/admin/create-reviewer" -Method POST -Headers $headers -Body $body
+
+Using curl (if installed):
+curl -X POST https://flexisaf-admission-api-backend.onrender.com/api/admin/create-reviewer -H "Content-Type: application/json" -d "{\"email\":\"admin@flexisaf.com\",\"password\":\"admin123\"}"
+
+
+REVIEWER LOGIN CREDENTIALS (after running either option):
+==========================================================
+Email: admin@flexisaf.com
+Password: admin123
+
+IMPORTANT: Change this password after first login!
+
+
+WHAT THE SQL SCRIPT DOES:
+==========================
+1. Deletes all empty Applicant records (GPA=0, test_score=0, no program)
+2. Creates/updates a REVIEWER account with email: admin@flexisaf.com
+3. Shows verification results
+
+
+AFTER RUNNING THE FIX:
+======================
+1. Try logging in with admin@flexisaf.com / admin123
+2. New student registrations will NOT create empty applications anymore (code already fixed locally)
+3. Students who register will see the proper application form, not empty "Application Details"
+
+
+NOTE: The AuthService.java fix is already done locally but not deployed.
+To make the fix permanent, we need to deploy the updated code to Render.

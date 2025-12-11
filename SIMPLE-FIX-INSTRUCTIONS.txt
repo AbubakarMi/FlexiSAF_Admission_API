@@ -1,0 +1,67 @@
+EASIEST WAY TO FIX THE DATABASE
+================================
+
+Since PostgreSQL client is not installed, here's the simplest solution:
+
+STEP 1: Install PostgreSQL (just the client tools)
+---------------------------------------------------
+Download from: https://www.postgresql.org/download/windows/
+
+OR use this direct link for portable tools:
+https://www.enterprisedb.com/download-postgresql-binaries
+
+Just install the "command line tools" - you don't need the full server.
+
+
+STEP 2: Run the batch script
+-----------------------------
+After installing psql, simply double-click:
+run-database-fix.bat
+
+That's it! The script will automatically:
+- Connect to your Render database
+- Delete empty applicant records
+- Show you the results
+
+
+ALTERNATIVE: Manual Steps (if you don't want to install psql)
+==============================================================
+
+1. Go to: https://dashboard.render.com
+2. Click on your database: flexisaf_admission_db
+3. Click "Connect" button (top right)
+4. Look for the "PSQL Command" - it will look like:
+   PGPASSWORD=xxx psql -h xxx -U flexisaf_admission_db_user flexisaf_admission_db
+
+5. Copy that command and run it in Command Prompt
+   (This will work if you have psql installed from any PostgreSQL installation)
+
+6. Once connected (you'll see: flexisaf_admission_db=>), paste this:
+
+DELETE FROM applicants WHERE (gpa IS NULL OR gpa = 0 OR gpa = 0.0) AND (test_score IS NULL OR test_score = 0) AND (program IS NULL OR program = '' OR TRIM(program) = '');
+SELECT COUNT(*) as total_applicants_remaining FROM applicants;
+SELECT COUNT(*) as total_users FROM users;
+SELECT email, role FROM users WHERE role IN ('REVIEWER', 'ADMIN');
+
+7. Press Enter
+
+
+WHAT'S ALREADY FIXED:
+=====================
+✓ Reviewer account created successfully
+  Email: admin@flexisaf.com
+  Password: admin123
+
+✓ Code fixed to prevent empty applicants (but needs deployment)
+
+WHAT NEEDS TO BE DONE:
+======================
+✗ Delete existing empty applicant records (run the SQL above)
+✗ Deploy the updated AuthService.java code to Render (so new registrations work correctly)
+
+
+AFTER RUNNING THE SQL:
+======================
+- Admin can login with admin@flexisaf.com / admin123
+- Existing users with empty applications will be cleaned up
+- New registrations will still create empty applicants until we deploy the code fix
